@@ -1,0 +1,1597 @@
+%\documentclass[12pt,a4paper]{article}  % Use this line if this document will be released
+\documentclass[12pt,a4paper,draft]{article}  % Use this line if this document is a draft
+\usepackage{ifdraft}
+
+
+%% Bibliography
+\usepackage{etoolbox}
+\newcommand{\bibfile}{\jobname.bib}  % Name of the BibTeX file.
+% ref.bib should be a symbolic link to the universal BibTeX file, which should be a local copy of
+% https://github.com/equipez/bibliographie/blob/main/ref.bib
+% Run `getbib` in the current directory under the draft mode to get the BibTeX file containing only
+% the cited references. The name will be xyz.bib if this TeX file is xyz.tex.
+\newcommand{\universalbib}{ref.bib}
+\ifdraft{\IfFileExists{\universalbib}{\renewcommand{\bibfile}{\universalbib}}{}}{}
+% The counter `cite' is used to count the number of citations.
+\newcounter{cite}
+\pretocmd{\cite}{\stepcounter{cite}}{}{}
+
+
+%% Add line numbers in draft mode
+%%\RequirePackage[mathlines]{lineno}
+%%\ifdraft{\linenumbers}{}
+%%\renewcommand{\linenumberfont}{\normalfont\scriptsize\sffamily\color{gray}}
+%%\setlength{\linenumbersep}{\marginparsep}
+
+
+%% Geometry
+%\voffset=-1.5cm \hoffset=-1.4cm \textwidth=16cm \textheight=22.0cm  % Luis' setting
+\usepackage[a4paper, textwidth=16.0cm, textheight=22.0cm]{geometry}
+\renewcommand{\baselinestretch}{1.2}
+
+
+%% Basic packages
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{mathtools}  % Provides \coloneqq
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{empheq}
+\usepackage{xcolor}
+\usepackage[bbgreekl]{mathbbol}
+\DeclareSymbolFontAlphabet{\mathbbm}{bbold}
+\DeclareSymbolFontAlphabet{\mathbb}{AMSb}
+\usepackage{bbm}
+\usepackage{upgreek}
+\usepackage{accents}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{multirow,booktabs}
+\usepackage{mdframed}
+\usepackage[en-US]{datetime2}
+
+
+%% Format of the table of content
+\usepackage[normalem]{ulem}
+\usepackage[toc,page]{appendix}
+\renewcommand{\appendixpagename}{\Large{Appendix}}
+\renewcommand{\appendixname}{Appendix}
+\renewcommand{\appendixtocname}{Appendix}
+%\usepackage{sectsty}
+\setcounter{tocdepth}{2}
+
+
+%% Section title style
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\large}
+
+
+%% Some colors
+\definecolor{darkblue}{rgb}{0,0.1,0.5}
+\definecolor{darkgreen}{rgb}{0,0.5,0.1}
+\definecolor{darkyellow}{rgb}{0.65,0.65,0.01}
+
+
+%% Todo notes
+\ifdraft{
+    \setlength{\marginparwidth}{2.42cm}
+    \usepackage[tickmarkheight=3pt,textsize=small,backgroundcolor=blue!16,linecolor=purple,bordercolor=purple]{todonotes}
+}{
+    \newcommand{\todo}[1]{}
+    \newcommand{\listoftodos}{}
+}
+
+
+%% Graph, tikz and pgf
+%\usepackage{subfigure}
+\setlength{\unitlength}{1mm}
+% The \unitlength command is a Length command. It defines the units used in the Picture Environment.
+\usepackage{graphicx}
+%\usepackage{tikz,tikzscale,pgf,pgfarrows,pgfnodes,filecontents,tikz-cd}
+\usepackage{tikz,tikzscale,pgf}
+\usetikzlibrary{arrows,arrows.meta,patterns,positioning,decorations.markings,shapes}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage[justification=centering]{caption}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.11}
+
+
+%% Turn off some unharmful warnings in draft mode
+%% N.B.: DO NOT use `silence` together with `hyperref`. They will cause an infinite loop.
+\ifdraft{
+    \usepackage{silence}
+    \WarningFilter{xcolor}{Incompatible color definition on}
+    \WarningFilter{hyperref}{Draft mode on}
+    \WarningFilter{refcheck}{Unused label}
+    \WarningFilter{microtype}{`draft' option active}
+    \WarningFilter{latex}{Writing or overwriting file} % Mute the warning about 'writing/overwriting file'
+    \WarningFilter{latex}{Writing file} % Mute the warning about 'writing/overwriting file'
+    \WarningFilter{latex}{Tab has} % Mute the warning about 'Tab has been converted to Blank Space'
+    \WarningFilter{latex}{Marginpar on page} % Mute the warning about 'Marginpar on page xx moved'
+    \WarningFilter{latex}{author given} % Mute the warning about 'No \author given'
+}{}
+
+
+%% Hyperref, url, and email
+%% N.B.: DO NOT use `silence` together with `hyperref`. They will cause an infinite loop.
+\ifdraft{\usepackage{refcheck}\newcommand{\url}{\texttt}}{
+    \usepackage{hyperref}
+    \hypersetup{colorlinks, linkcolor=darkblue, anchorcolor=darkblue, citecolor=darkblue, urlcolor=darkblue}
+    \usepackage{url}
+} % Check unused labels
+\newcommand{\email}{\texttt}
+
+
+%% Enumerate and itemize
+\usepackage{eqlist}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*}
+\setlist[enumerate]{leftmargin=*,label=\normalfont{(\alph*)}}
+
+
+%% Algorithm environment
+\usepackage[section]{algorithm}
+\usepackage{algpseudocode,algorithmicx}
+\newcommand{\INPUT}{\textbf{Input}}
+\newcommand{\FOR}{\textbf{For}~}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\alglinenumber[1]{\normalsize #1.}
+\newcommand*\Let[2]{\State #1 $=$ #2}
+% Breakable algorithm environment (allows page breaks)
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {\begin{center}
+     \refstepcounter{algorithm}
+     \hrule height.8pt depth0pt \kern2pt
+     \renewcommand{\caption}[2][\relax]{
+       {\raggedright\textbf{\fname@algorithm~\thealgorithm} ##2\par}
+       \ifx\relax##1\relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}
+       \else
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}
+       \fi
+       \kern2pt\hrule\kern2pt
+     }
+  }{
+     \kern2pt\hrule\relax
+   \end{center}
+  }
+\makeatother
+
+
+%% Theorem-like environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{exercise}{Exercise}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{problem}{Problem}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{question}{Question}[section]
+% Change theoremstyle to ``definition'', which uses textnormal for the text.
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+% proof
+\usepackage{xpatch}
+\xpatchcmd{\proof}{\itshape}{\normalfont\proofnamefont}{}{}
+\newcommand{\proofnamefont}{\bfseries}
+
+%% Equation numbering
+\numberwithin{equation}{section}
+
+
+%% Fine tuning
+\usepackage{microtype}
+\usepackage[nobottomtitles*]{titlesec} % No section title at the bottom of pages
+% Prevent footnote from running to the next page
+\interfootnotelinepenalty=10000
+% No line break in inline math
+\interdisplaylinepenalty=10000
+\relpenalty=10000
+\binoppenalty=10000
+% No widow or orphan lines
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+
+
+% Use @ to put 1 math unit (mu) in math
+% See https://nhigham.com/2013/01/07/fine-tuning-spacing-in-latex-equations/
+% and also TeXbook p. 155.
+\mathcode`@="8000{\catcode`\@=\active\gdef@{\mkern1mu}}
+
+
+%% Operators, commands
+\usepackage{relsize}
+\usepackage{nccmath}
+%\DeclareMathOperator*{\mcap}{\,\medmath{\bigcap}\,}
+%\DeclareMathOperator*{\mcup}{\,\medmath{\bigcup}\,}
+\DeclareMathOperator*{\mcap}{\,\mathsmaller{\bigcap}\,}
+\DeclareMathOperator*{\mcup}{\,\mathsmaller{\bigcup}\,}
+%\renewcommand{\cap}{\mcap}
+%\renewcommand{\cup}{\mcup}
+
+\newcommand{\ceil}[1]{ {\lceil{#1}\rceil} }
+\newcommand{\floor}[1]{ {\lfloor{#1}\rfloor} }
+
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\sort}{sort}
+\DeclareMathOperator*{\Argmax}{Argmax}
+\DeclareMathOperator*{\Argmin}{Argmin}
+\DeclareMathOperator*{\Arglocmin}{Arglocmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\diag}{diag}
+\DeclareMathOperator*{\Diag}{Diag}
+\DeclareMathOperator{\Span}{span}
+\DeclareMathOperator{\med}{med}
+\DeclareMathOperator{\essinf}{essinf}
+\DeclareMathOperator{\cl}{cl}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\comp}{C}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\card}{card}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\dist}{dist}
+\newcommand{\disth}{{\operatorname{\updelta_{\sss{H}}}}}
+\newcommand{\ind}{\mathbbm{1}}
+%\newcommand*{\defeq}{\stackrel{\mbox{\normalfont\tiny{\textnormal{def}}}}{=}}
+\newcommand\defeq{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\BB}{\mathcal{B}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\TT}{\mathcal{T}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\XX}{\mathcal{X}}
+\newcommand{\sset}{\mathcal{S}}
+\newcommand{\pen}{h}
+\newcommand{\penpar}{\mu}
+\newcommand{\res}{\rho}
+\newcommand{\col}{r}
+\newcommand{\ofd}{\mathcal{F}}
+\newcommand{\stf}[1]{\mathbb{S}^{#1}}
+\newcommand{\sss}[1]{{\scriptscriptstyle{#1}}}
+\newcommand{\sK}{{\scriptscriptstyle{K}}}
+\newcommand{\sT}{{\scriptscriptstyle{T}}}
+\newcommand{\fro}{{\scriptstyle{\textnormal{F}}}}
+\newcommand{\trs}{{\scriptstyle{\mathsf{T}}}}
+\newcommand{\hmt}{{\scriptstyle{{\mathsf{H}}}}}
+\newcommand{\pin}{{\scriptstyle{{\mathsf{+}}}}}
+\newcommand{\inv}{{-1}}
+\newcommand{\adj}{*}
+\newcommand{\ones}{\mathbf{1}}
+
+\newcommand{\cs}{\text{c}}
+\newcommand{\hp}{\circ}
+\newcommand{\cc}{\sss{\textnormal{C}}}
+\newcommand{\dec}{\sss{\textnormal{D}}}
+\newcommand{\cauchy}{\sss{\textnormal{C}}}
+\newcommand{\scauchy}{\sss{\textnormal{S}}}
+\newcommand{\crit}{\textnormal{crit}}
+\newcommand{\rsg}{\hat{\partial}}
+\newcommand{\gsg}{\partial}
+\newcommand{\dom}{\textnormal{dom}}
+\newcommand{\tf}{{\textnormal{f}}}
+\newcommand{\tg}{{\textnormal{g}}}
+\newcommand{\ts}{{\textnormal{s}}}
+\newcommand{\st}{\textnormal{s.t.}}
+\newcommand{\etc}{{etc.}\xspace}
+\newcommand{\ie}{{i.e.}\xspace}
+\newcommand{\eg}{{e.g.}\xspace}
+\newcommand{\etal}{{et al.}\xspace}
+\newcommand{\iid}{\text{i.i.d.}\xspace}
+\newcommand{\as}{\text{a.s.}\xspace}
+
+\newcommand{\me}{\mathrm{e}}
+\newcommand{\md}{\mathrm{d}}
+\newcommand{\mi}{\mathrm{i}}
+\newcommand{\lev}{\mathrm{lev}}
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bx}{\mathbf{u}}
+%\newcommand{\bb}{\mathbf{f}}
+\newcommand{\bb}{\mathbf{r}}
+\newcommand{\nov}{n_{\textnormal{o}}}
+
+\newcommand{\grad}{\mathrm{grad}\,}
+\newcommand{\hess}{\mathrm{Hess}\,}
+\newcommand{\VT}{\mathcal{T}}
+\xspaceaddexceptions{]\}}
+% tex.stackexchange.com/questions/15252/why-does-xspace-behave-differently-for-parenthesis-vs-braces-brackets
+\newcommand{\MATLAB}{\textsc{Matlab}\xspace}
+\newcommand{\octave}{\mbox{GNU Octave}\xspace}
+\newcommand{\prblm}{\texttt}
+\DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{\mddefault}{\sldefault}
+\SetMathAlphabet{\mathsfit}{bold}{T1}{\sfdefault}{\bfdefault}{\sldefault}
+\newcommand{\prbb}{\mathsfit{p}}
+\newcommand{\pp}{\mathsf{p}}
+\newcommand{\qq}{\mathsf{q}}
+\newcommand{\ttt}{\mathsfit{t}}
+\newcommand{\tol}{\varepsilon}
+\newcommand{\bt}{\mathbf{t}}
+\newcommand{\br}{\mathbf{r}}
+\newcommand{\dd}{\mathbf{d}}
+\newcommand{\ii}{\mathbf{i}}
+\newcommand{\jj}{\mathbf{j}}
+\newcommand{\xx}{\mathbf{x}}
+\renewcommand{\pp}{\mathbf{p}}
+\renewcommand{\ggg}{\mathbf{g}}
+\newcommand{\GG}{\mathbf{G}}
+\DeclareMathOperator{\expc}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\lb}{\underline}
+\newcommand{\ub}{\overline}
+
+% mathlcal font
+\DeclareFontFamily{U}{dutchcal}{\skewchar\font=45 }
+\DeclareFontShape{U}{dutchcal}{m}{n}{<-> s*[1.0] dutchcal-r}{}
+\DeclareFontShape{U}{dutchcal}{b}{n}{<-> s*[1.0] dutchcal-b}{}
+\DeclareMathAlphabet{\mathlcal}{U}{dutchcal}{m}{n}
+\SetMathAlphabet{\mathlcal}{bold}{U}{dutchcal}{b}{n}
+
+% mathscr font (supporting lowercase letters)
+%\usepackage[scr=dutchcal]{mathalfa}
+%\usepackage[scr=esstix]{mathalfa}
+%\usepackage[scr=boondox]{mathalfa}
+%\usepackage[scr=boondoxo]{mathalfa}
+\usepackage[scr=boondoxupr]{mathalfa}
+%\newcommand{\model}{\mathscr{h}}
+\newcommand{\model}{\tilde{f}}
+\newcommand{\rmod}{F}
+
+\newcommand{\Set}[1]{\mathcal{#1}}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it} % The mathpzc font
+\newcommand{\slv}{\mathpzc}
+% mathpzc looks great, but it stops working on 19 Feb 2020 for no reason.
+%\newcommand{\slv}{\mathscr}
+\newcommand{\software}{\texttt}
+\DeclareMathOperator{\eff}{\mathsf{e}\;\!}
+\DeclareMathOperator{\Eff}{\mathsf{E}\;\!}
+\newcommand{\out}{{\text{out}}}
+
+%% Color
+\newcommand{\bad}[1]{\textcolor{red}{#1}}
+\newcommand{\good}[1]{\textcolor{blue}{#1}}
+
+%% Commands for revision
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\green}[1]{\textcolor{darkgreen}{#1}}
+\newcommand{\TYPO}[1]{{\color{orange}{#1}}}
+\newcommand{\MISTAKE}[1]{{\color{violet}{#1}}}
+\newcommand{\REPHRASE}[1]{{\color{darkgreen}{#1}}}
+\newcommand{\REVISE}[1]{{\color{blue}{#1}}}
+\newcommand{\REVISEred}[1]{{\color{red}{#1}}}
+\newcommand{\COMMENT}{\todo}  % Needs the todonotes package
+%\newcommand{\COMMENT}[1]{\textcolor{brown}{{\small{(comment: #1)}}}}  % This puts comments inline
+
+% Use the following if revision is finished
+%\newcommand{\TYPO}{}
+%\newcommand{\MISTAKE}{}
+%\newcommand{\REPHRASE}{}
+%\newcommand{\REVISE}{}
+%\newcommand{\REVISEred}{}
+%\newcommand{\COMMENT}[1]{}  % Input ignored.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Convergence of Riemannian Broyden Family of Quasi-Newton Methods with Wolfe Line Search}
+\author{Xie Zhilin}
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+We study the global convergence of a Riemannian Broyden family of quasi-Newton methods on complete Riemannian manifolds. The algorithm approximates the Riemannian Hessian via a convex combination of DFP and BFGS updates, transported between tangent spaces by an isometric vector transport satisfying a locking condition. This essay is mainly based on the Chapter 4 of the paper \cite{Huangw2013}.
+\end{abstract}
+\tableofcontents
+\section{Introduction and Preliminaries}
+Quasi-Newton methods are a class of optimization algorithms that approximate the Hessian matrix of the objective function to achieve faster convergence than gradient descent. Riemann Newton's method is a generalization of Newton's method to Riemannian manifolds, which allows us to optimize functions intrinsically defined on a Riemannian manifold. In this essay, we focus on the convergence analysis of Riemann Newton's method with Wolfe line search, which is a popular line search strategy that ensures sufficient decrease in the objective function.
+\subsection{Quasi-Newton Methods in Euclidean Space}
+Consider the unconstrained optimization problem in Euclidean space
+\begin{equation}\label{quasi_newton_euclidean}
+\min_{x \in \RR^n} f(x),
+\end{equation}
+where $f: \RR^n \to \RR$ is a twice continuously differentiable function. Consider the Taylor expansion of its gradient at a point $x^{k+1}$
+\[
+    \nabla f(x) = \nabla f(x^{k+1}) + \nabla^2 f(x^{k+1})(x-x^{k+1}) + O(\|x-x^{k+1}\|^2)
+\]
+denote $x = x^k, s^k = x^{k+1} - x^k$ and $y^k = \nabla f(x^{k+1}) - \nabla f(x^k)$, we have
+\[
+y^k = \nabla^2 f(x^{k+1}) s^k + O(\|s^k\|^2)
+\]
+if we avoid the $O(\|s^k\|^2)$ term, we have the \emph{secant equation}
+\begin{align}
+        y^k &= B^{k+1} s^k, \label{secant_equation1}\\ 
+        s^k &= H^{k+1} y^k \label{secant_equation2}
+\end{align}
+the $B^{k+1}$ and $H^{k+1}$ are the approximations of the Hessian matrix and its inverse, respectively. We hope $B^{k+1}$ is a positive definite matrix, that is
+\begin{equation}\label{curvature_condition}
+    (s^k)^\top B^{k+1} s^k = (s^k)^\top y^k > 0
+\end{equation}
+for all $s^k \neq 0$. The condition \eqref{curvature_condition} is called the \emph{curvature condition}. 
+\begin{definition}[Wolfe Conditions]
+        The condition
+        \begin{align}
+        f(x^{k+1}) &\leq f(x^k) + c_1 \nabla f(x^k)^\top s^k,\label{armijo_condition}\\
+        \nabla f(x^{k+1})^\top s^k &\geq c_2 \nabla f(x^k)^\top s^k \label{curvature_condition_wolfe}
+        \end{align}
+        for some constants $0 < c_1 < c_2 < 1$ are called the \emph{Wolfe conditions}.
+\end{definition}
+\begin{lemma}
+        If the Wolfe conditions hold, then the curvature condition \eqref{curvature_condition} holds.
+\end{lemma}
+\begin{proof}
+        It is easy to check that
+        \[
+                \nabla f(x^{k+1})^\top s^k \geq c_2 \nabla f(x^k)^\top s^k
+        \]
+        we minus $\nabla f(x^k)^\top s^k$ on both sides, we have
+        \[
+                (s^k)^\top y^k=\nabla f(x^{k+1})^\top s^k - \nabla f(x^k)^\top s^k \geq (c_2 - 1) \nabla f(x^k)^\top s^k
+        \]
+        since $c_2 < 1$ and $s^k$ is a descent direction, we have $\nabla f(x^k)^\top s^k < 0$, thus $(s^k)^\top y^k > 0$.
+\end{proof}
+
+We have the \emph{Davidon-Fletcher-Powell (DFP) update}
+\begin{equation}\label{DFP_update_B}
+        B^{k+1} = (I - \rho_k y^k (s^k)^\top) B^k (I - \rho_k s^k (y^k)^\top) + \rho_k y^k (y^k)^\top.
+\end{equation}
+where $\rho_k = 1/(y^k)^\top s^k$. 
+
+Another famous update is the \emph{Broyden-Fletcher-Goldfarb-Shanno (BFGS) update}
+\begin{equation}\label{BFGS_update}
+        B^{k+1} = B^k + \frac{y^k (y^k)^\top}{(y^k)^\top s^k} - \frac{B^k s^k (s^k)^\top B^k}{(s^k)^\top B^k s^k}
+\end{equation}
+As we know, the DFP formula \eqref{DFP_update_B} solves the following optimization problem
+\begin{equation}\label{DFP_optimization_problem}
+        \begin{aligned}
+                \min_{B} &\quad \|B - B^k\|_W \\
+                \st &\quad B = B^\top, \\
+                &\quad B s^k = y^k
+        \end{aligned}
+\end{equation}
+where $W$ is an arbitrary matrix satisfying $Wy_k = s^k$ and $\|A\|_W = \|W^{1/2} A W^{1/2}\|_F$. A possible choice of $W$ is the inverse of the average Hessian matrix, that is 
+\begin{equation}\label{W_choice}
+        W = \left(\int_0^1 \nabla^2 f(x^k + t s^k) dt\right)^{-1}
+\end{equation}
+
+Similarly, the BFGS formula \eqref{BFGS_update} solves the following optimization problem
+\begin{equation}\label{BFGS_optimization_problem}
+        \begin{aligned}
+                \min_{H} &\quad \|H - H^k\|_W \\
+                \st &\quad H = H^\top, \\
+                &\quad H y^k = s^k
+        \end{aligned}
+\end{equation}
+
+Yuan proved that if the Wolfe conditions hold, then the DFP update is well-defined and $H^{k+1}$ is positive definite.
+\begin{theorem}[\cite{Yuan1995}]\label{DFP_convergence}
+        If the initial matrix $H^0$ is positive definite and the Wolfe conditions hold, the objective function $f$ is twice continuously differentiable and bounded below, and the level set $$\mathcal{L}=\{x: f(x) \leq f(x^0)\}$$ is convex, and there exists a positive $m$ and a positive $M$ such that
+\begin{equation}
+        m\|s\|^2 \leq s^\top \nabla^2 f(x) s \leq M \|s\|^2
+\end{equation}
+for all $s \in \RR^n$ and $x\in\mathcal{L}$, then the DFP method with Wolfe line search converges globally to a critical point.
+\end{theorem}
+Broyden conbines the DFP update and the BFGS update, which is defined by
+\begin{equation}
+        B^{k+1} = (1-\phi_k)B^k_{\mathrm{BFGS}} + \phi_k B^k_{\mathrm{DFP}}
+\end{equation}
+where $\phi_k\in [0,1]$ is a parameter. 
+\subsection{Some Notations and Definitions in Riemannian Geometry}
+\subsubsection{Multilinear Algebra and Tensor}
+\begin{definition}
+        Assume $R$ is a ring and $V,W$ are two left $R$-modules. Define a equality relation $\sim$ on the free module generated by $V\times W$ as 
+                \[
+                \begin{aligned}
+                (v_1 + v_2, w) &\sim (v_1,w) + (v_2,w), \\
+                (v, w_1 + w_2) &\sim (v,w_1) + (v,w_2), \\
+                (r v, w) &\sim r (v,w), \\
+                (v, r w) &\sim r (v,w)
+                \end{aligned}
+                \]
+        for all $v,v_1,v_2 \in V$, $w,w_1,w_2 \in W$ and $r \in R$. The quotient module is called the \emph{tensor product} of $V$ and $W$, denoted by $V \otimes_R W$ or simply $V \otimes W$ if there is no confusion. The equivalence class of $(v,w)$ is denoted by $v \otimes w$.
+\end{definition}
+If we do not specify the ring $R$, we assume $R$ is a field, and the modules are vector spaces. The most important property of the tensor product is the following universal property.
+\begin{theorem}[\cite{Tu2017} Theorem 18.3]\label{universal_property_tensor_product}
+        Assume $V,W,Z$ are $R$-modules, where $R$ is commutative ring with identity. For a $R$-bilinear map $f:V\times W \to Z$, there exists a unique linear map $\tilde{f}: V\otimes_R W \to Z$, such that the following diagram commutes
+    \[
+    \begin{tikzcd}
+        V \times W \arrow{r}{\otimes} \arrow[swap]{rd}{f} & V \otimes_R W \arrow{d}{\tilde{f}} \\
+         & Z
+    \end{tikzcd}
+    \]
+    if there exists another module $T$ and $\phi: V \times W \to T$ is a $R$-bilinear map such that the following diagram commutes
+    \[
+    \begin{tikzcd}
+        V \times W \arrow{r}{\otimes} \arrow[swap]{rd}{f} & T \arrow{d}{\tilde{f}} \\
+         & Z
+    \end{tikzcd}
+    \]
+    then we have $T \cong V \otimes_R W$.
+\end{theorem}
+Using Theorem \ref{universal_property_tensor_product}, we can derive the dual of tensor product.
+\begin{theorem}[\cite{Tu2017} Proposition 18.15]\label{dual_tensor_product}
+        Assyme $V,W$ is free $R$-module with finite dimension, then there exists an $R$-module isomorphism
+    \[
+    \tilde{f}:V^\ast \otimes_R W^\ast \to (V\otimes_R W)^\ast,
+    \]
+    such that for all $\alpha \in V^*, \beta \in W^*, v\in V, w\in W$, we have
+    \[
+    \tilde{f}(\alpha \otimes \beta)(v\otimes w) = \alpha(v) \beta(w),
+    \]
+\end{theorem}
+\begin{theorem}[\cite{Tu2017} Proposition 18.17]\label{tensor_product_homomorphism}
+        Let $f:V_1 \to V_2$ and $g:W_1 \to W_2$ is $R$-module homomorphism, then there exists unique $R$-module homomorphism
+    \[
+    f\otimes g: V_1 \otimes_R W_1 \to V_2 \otimes_R W_2,
+    \]
+        such that for all $v\in V_1, w\in W_1$, we have
+    \[
+    (f\otimes g)(v\otimes w) = f(v) \otimes g(w),
+    \]
+\end{theorem}
+
+For an arbitrary $F$-linear space $V$, we define
+\begin{equation}
+        \otimes^{l,k} V = \underbrace{V^\ast \otimes \cdots \otimes V^\ast}_{l\text{ times}} \otimes \underbrace{V \otimes \cdots \otimes V}_{k\text{ times}} \cong \mathrm{Hom}\left(\bigotimes^l V\otimes\bigotimes^k V^\ast,F\right)
+\end{equation}
+the element in $\otimes^{l,k} V$ is called a \emph{tensor of type $(l,k)$}. The index $l$ is called the \emph{covariant order} and the index $k$ is called the \emph{contravariant order}. A tensor of type $(0,0)$ is a scalar, a tensor of type $(1,0)$ is a vector, and a tensor of type $(0,1)$ is a covector. A tensor of type $(1,1)$ is called a \emph{linear operator}, since it can be identified with an element in $\mathrm{Hom}(V,V)$. A tensor of type $(0,2)$ is called a \emph{bilinear form}, since it can be identified with an element in $\mathrm{Hom}(V\otimes V,F)$. A tensor of type $(2,0)$ is called a \emph{quadratic form}, since it can be identified with an element in $\mathrm{Hom}(V^\ast \otimes V^\ast,F)$.
+\subsubsection{Smooth Manifolds and Tangent Spaces}
+In brief, a smooth manifold is a topological space that locally looks like Euclidean space and has a smooth structure. The so-called smooth structure is to make sure the charts change smoothly, so that we can define the smoothness of functions on the manifold. 
+\begin{definition}[Smooth Manifold]
+        A \emph{smooth manifold} is a topological space $M$ such that for each point $p \in M$, there exists an open neighborhood $U$ of $p$ and a homeomorphism $\varphi: U \to \RR^n$. The pair $(U, \varphi)$ is called a \emph{chart} around $p$. A collection of charts $\{(U_\alpha, \varphi_\alpha)\}$ is called an \emph{atlas} if $\cup_\alpha U_\alpha = M$ and the transition map $\varphi_\beta \circ \varphi_\alpha^{-1}$ is smooth for all $\alpha$ and $\beta$.
+\end{definition}
+To derive smoothness of a function defined on a smooth manifold, we need to use the charts to pull back and push forward the function to Euclidean space.
+\begin{definition}[Smooth Map]
+        Let $M^m$ and $N^n$ are two smooth manifolds. A map $f: M \to N$ is called \emph{smooth} if for any charts $(U, \varphi)$ around $p \in M$ and $(V, \psi)$ around $f(p) \in N$, the map $\psi \circ f \circ \varphi^{-1}$ is smooth from $\varphi(U)\subseteq \RR^m$ to $\psi(V)\subseteq \RR^n$.
+\end{definition}
+\begin{definition}[Tangent Space]
+        Let $M$ is a smooth manifold and $p \in M$ is a point. A \emph{tangent vector} is a linear map $v_p: C^\infty(M) \to \RR$ such that for all $f,g \in C^\infty(M)$ it satisfies the Leibniz rule
+        \[
+        v_p(fg) = f(p) v_p(g) + g(p) v_p(f)
+        \]
+        The set of all tangent vectors at $p$ is called the \emph{tangent space} at $p$, denoted by $T_p M$.
+\end{definition}
+A basic example of tangent vector is derived by charts. Let $(U, \varphi)$ is a chart around $p$, we can define the tangent vector $\partial_i$ by
+\[
+\partial_i(f) = \frac{\partial (f \circ \varphi^{-1})}{\partial x_i}(\varphi(p))
+\]
+where $\frac{\partial}{\partial x_i}$ is the partial derivative in Euclidean space. It is easy to check that $\{\partial_1, \cdots, \partial_n\}$ is a basis of $T_p M$. Thus we can identify $T_p M$ with $\RR^n$ by the chart $(U, \varphi)$.
+
+Denote the $(k,l)$-tensor of $T_p M$ by $\otimes^{k,l} T_p M$.
+\begin{definition}[Tensor Field]
+        A \emph{tensor field} of type $(k,l)$ on $M$ is a map $$T: M \to \cup_{p\in M} \otimes^{k,l} T_p M$$ such that for each $p\in M$, $T(p) \in \otimes^{k,l} T_p M$ and for any smooth vector fields $X_1, \cdots, X_k$ and any smooth covector fields $\omega_1, \cdots, \omega_l$, the function $$T(X_1, \cdots, X_k, \omega_1, \cdots, \omega_l): M \to \RR$$ defined by
+\[
+T(X_1, \cdots, X_k, \omega_1, \cdots, \omega_l)(p) = T(p)(X_1(p), \cdots, X_k(p), \omega_1(p), \cdots, \omega_l(p))
+\]
+is smooth.
+\end{definition}
+\subsubsection{Riemann Manifolds and Riemannian Metrics}
+
+\begin{definition}[Riemannian Metric]
+        Let $M$ is a smooth manifold. A \emph{Riemannian metric} on $M$ is a second order covariant tensor field $g$ such that 
+        \begin{enumerate}
+                \item For each $p \in M$, the map $g_p: T_p M \times T_p M \to \RR$ is a positive definite inner product.
+                \item For any smooth vector fields $X$ and $Y$, the function $g(X,Y): M \to \RR$ defined by $g(X,Y)(p) = g_p(X(p), Y(p))$ is smooth.
+        \end{enumerate}
+        given a Riemannian metric $g$, we call the pair $(M,g)$ a \emph{Riemannian manifold}.
+\end{definition}
+By partition of unity, we can always construct a Riemannian metric on a second countable smooth manifold. 
+\begin{theorem}[Fundamental Theorem of Riemannian Geometry]
+        Let $M$ be a second countable smooth manifold, then there always exists a Riemann metric on $M$.
+\end{theorem}
+
+\subsubsection{Covariant Derivative, Levi-Civita Connection, Parallel Transport and Geodesic}
+In order to generalize derivatives to Riemannian manifolds, we need to introduce the notion of covariant derivative. 
+
+A covariant derivative is a way to differentiate vector fields along other vector fields on a Riemannian manifold. Let $(M,g)$ is a Riemannian manifold, a \emph{affine connection} is a map $\nabla: \Gamma^\infty(TM) \times \Gamma^\infty(TM) \to \Gamma^\infty(TM)$, where $\Gamma^\infty(TM)$ is the set of all smooth vector fields on $M$, such that for all $X,Y,Z \in \Gamma^\infty(TM)$ and $f\in C^\infty(M)$, we have
+\begin{enumerate}
+        \item Smooth function Linearity. $\nabla_{fX + gY} Z = f \nabla_X Z + g \nabla_Y Z$ for all $f,g \in C^\infty(M)$.
+        \item Linearity. $\nabla_X (aY + bZ) = a\nabla_X Y + b\nabla_X Z$ for all real numbers $a,b$.
+        \item Leibniz rule. $\nabla_X (fY) = f \nabla_X Y + X(f) Y$ for all $f \in C^\infty(M)$.
+\end{enumerate}
+Jost gives an explanation to the name ``affine connection'' in \cite{Jost2017}. The symbol $\nabla_XY$ is called the \emph{covariant derivative} of $Y$ along $X$. The covariant derivative $\nabla_X Y$ can be regarded as the directional derivative of $Y$ along $X$.
+
+A covariant derivative $\nabla$ can be regarded as a $(1,2)$-tensor field. 
+
+We called a covariant derivative $\nabla$ is \emph{compatible} with the Riemannian metric $g$ if for all $X,Y,Z \in \Gamma^\infty(TM)$, we have
+\[
+X(g(Y,Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)
+\]
+A covariant derivative $\nabla$ is \emph{torsion-free} if for all $X,Y \in \Gamma^\infty(TM)$, we have
+\[
+\nabla_X Y - \nabla_Y X = [X,Y]
+\]
+\begin{theorem}[Levi-Civita Connection]
+        Let $(M,g)$ is a Riemannian manifold, then there exists a unique covariant derivative $\nabla$ that is compatible with $g$ and torsion-free. We call $\nabla$ the \emph{Levi-Civita connection} of $(M,g)$.        
+\end{theorem}
+
+Given a affine connection $\nabla$, we can generalize it to all type of tensor fields by the following rules. 
+\begin{theorem}[\cite{Jost2017} Theorem 3.2.1]
+        Assume $\nabla$ is a affine connection on a Riemannian manifold $(M,g)$. For a fixed vector field $X$, we can define $\nabla_X: \Gamma^\infty(\otimes^{k,l} TM) \to \Gamma^\infty(\otimes^{k,l} TM)$ by the following rules
+        \begin{enumerate}
+                \item For all type of tensor fields $\theta$ and $\eta$, we have $$\nabla_X(\theta\otimes \eta) = \nabla_X \theta \otimes \eta + \theta \otimes \nabla_X \eta$$
+                \item For smooth function $f$ and $g$, tensor field $\theta$, vector field $X$ and $Y$, we have $$\nabla_{fX+gY} \theta = f \nabla_X \theta + g \nabla_Y \theta$$
+                \item For real number $a$ and $b$, tensor field $\theta$ and $\eta$, vector field $X$, we have $$\nabla_X (a\theta + b\eta) = a \nabla_X \theta + b \nabla_X \eta$$
+        \end{enumerate}
+        the formula of such $\nabla_X$ is given by
+                \begin{equation*}
+            \begin{aligned}
+            \nabla_X\left(T(Y_1,\ldots,Y_k,\omega_1,\ldots,\omega_l)\right) &= (\nabla_X T)(Y_1,\ldots,Y_k,\omega_1,\ldots,\omega_l) \\
+            &+ \sum_{i=1}^k T(Y_1,\ldots,\nabla_X Y_i,\ldots,Y_k,\omega_1,\ldots,\omega_l) \\
+            &+ \sum_{j=1}^l T(Y_1,\ldots,Y_k,\omega_1,\ldots,\nabla_X \omega_j,\ldots,\omega_l).
+        \end{aligned}
+        \end{equation*}
+\end{theorem}
+
+Given a smooth curve $\gamma: [0,1] \to M$ on a Riemannian manifold $(M,g)$, we can define the covariant derivative along $\gamma$ by $\nabla_{\dot{\gamma}} = \nabla_{\dot{\gamma}(t)}$. A vector field $Y = Y^i\partial_i$ along $\gamma$ is called a \emph{parallel vector field} if $\nabla_{\dot{\gamma}} Y = 0$, that is
+\begin{equation*}
+    \nabla_{\dot{\gamma}} Y = \frac{d x^i}{dt} \left(\frac{d Y^k}{d x^i} + Y^j \Gamma_{ij}^k\right) \partial_k = \left(\frac{d Y^k}{dt} + \frac{d x^i}{dt} Y^j \Gamma_{ij}^k\right) \partial_k = 0.
+\end{equation*}
+which is called the \emph{parallel transport equation}. A curve $\gamma$ is called a \emph{geodesic} if $\nabla_{\dot{\gamma}} \dot{\gamma} = 0$, that is
+\[
+    \nabla_{\dot{\gamma}} \dot{\gamma} = \left(\frac{d^2 \gamma^k}{d t^2} + \Gamma_{ij}^k \frac{d \gamma^i}{d t} \frac{d \gamma^j}{d t}\right) \partial_k = 0.
+\]
+\subsubsection{Retraction and Vector Transport}
+Recall that an exponential map $\exp_p: T_p M \to M$ is defined by $\exp_p(v) = \gamma_v(1)$, where $\gamma_v$ is the geodesic starting at $p$ with initial velocity $v$. We generalize the exponential map to a retraction since  exponential map may not be easy to compute in practice.
+\begin{definition}[Retraction]
+        Let $M$ is a smooth manifold. A \emph{retraction} is a smooth map $$R: TM\to M,\quad (p,v)\mapsto R_p(v)$$ such that for each curve $c(t) = R_p(t v)$, we have $c(0) = p$ and $c'(0) = v$.
+\end{definition}
+We notice that $dR_p(0) = \mathrm{id}$, where $dR_p(0)$ is the differential of $R_p$ at $0$. By the inverse function theorem, there exists a neighborhood $U$ of $0$ such that $R_p$ is a diffeomorphism from $U$ to $R_p(U)$. Thus we can use the retraction to define a local chart around a fixed $p$. This fact gives us a way to compute the Riemannian gradient.
+\begin{proposition}
+        Let $f: M \to \RR$ be a smooth function on a Riemannian manifold $(M,g)$ equipped with a retraction $R$. For any fixed point $p \in M$, we have
+\[
+\grad f(p) = \grad (f \circ R_p)(0)
+\]
+\end{proposition}
+\begin{proof}
+        By the chain rule, we have
+\[
+d(f \circ R_p)(0)[v] = df(p)[dR_p(0)[v]] = df(p)[v] = \langle \grad f(p), v \rangle_p
+\]
+since gradient is unique to
+\[
+\langle \grad (f \circ R_p)(0), v \rangle_p = d(f \circ R_p)(0)[v] = \langle \grad f(p), v \rangle_p
+\]
+for all $v \in T_p M$, we have $\grad f(p) = \grad (f \circ R_p)(0)$.
+\end{proof}
+
+Parallel transport is a way to transport a tangent vector along a curve while keeping it parallel to itself. Let $\gamma: [0,1] \to M$ is a curve on a Riemannian manifold $(M,g)$ and denote $\nabla$ the Levi-Civita connection, we say a vector field $V$ along $\gamma$ is parallel if $\nabla_{\dot{\gamma}} V = 0$. The parallel transport of a vector $v \in T_{\gamma(0)} M$ along $\gamma$ is the unique parallel vector field $V$ along $\gamma$ such that $V(0) = v$. We denote the parallel transport by $P^\gamma_{a\to b}: T_{\gamma(a)} M \to T_{\gamma(b)} M$. 
+\begin{proposition}
+        Parallel transport is an isometry.
+\end{proposition}
+\begin{proof}
+        Let $X$ and $Y$ are two parallel vector fields along $\gamma$, since $\nabla$ is compatible with the Riemannian metric, we have
+\[
+\frac{d}{dt} \langle X, Y \rangle = \langle \nabla_{\dot{\gamma}} X, Y \rangle + \langle X, \nabla_{\dot{\gamma}} Y \rangle = 0
+\]
+\end{proof}
+We generalize the parallel transport to a vector transport.
+\begin{definition}[Vector Transport]
+        Let $M$ is a smooth manifold. A \emph{vector transport} is a smooth map $$\VT: TM \oplus TM \to TM,\quad (p,v,w)\mapsto \VT_{v_p}(w)$$ such that for some retraction $R$ we have
+        \begin{enumerate}
+                \item For fixed $p$ and $v$, the map $\VT_{v_p}: T_p M \to T_{R_p(v)} M$ is a linear map.
+                \item For all $p\in M$ we have that $\VT_{0_p}$ is the identity map on $T_p M$.
+        \end{enumerate}
+\end{definition}
+Here is a direct comprehension of the vector transport. It transports a tangent vector $w$ at $p$ to a tangent vector at $R_p(v)$, and the transport is linear in $w$. 
+
+There are two kinds of vector transport we usually use beside parallel transport. The first one is the differentiated retraction, which satisfies
+\[
+dR_p(v)[w_p] = \VT_{v_p}(w_p)
+\]
+for all $p\in M$ and $v,w \in T_p M$, and we denote the vector transport $\VT_R$. The second one is the \emph{isometric} vector transport, which satisfies
+\[
+g_{R_p(v)}(\VT_{v_p}(w), \VT_{v_p}(w)) = g_p(w,w)
+\]
+for all $p\in M$ and $v,w \in T_p M$, and we denote the vector transport $\VT_S$.
+
+\section{Frame of Riemannian Broyden's Method}
+\subsection{Secant Equation on Riemannian Manifolds}
+The following equation is a generalization of Taylor expansion of a vector field $X$ at a point $p$ to a point $q$.
+\begin{theorem}\label{taylor_expansion_vector_field}
+        Let $(M,g)$ be a Riemannian manifold and $R$ is a retraction on $M$. Let $X$ is a smooth vector field on $M$. Consider $\gamma: [0,1] \to M$ is geodesic with initial velocity $\dot{\gamma}(0) = v$ and $\gamma(0) = p$, we have
+        \begin{equation}
+                P_{1\to0}^\gamma X_{\gamma(1)} = X_p + \sum_{i=1}^{k-1}\frac{1}{i!} \nabla^i_{\dot{\gamma}} X_p(v,\cdots,v) + R_k
+        \end{equation}
+        where $R_k$ is the remainder term 
+        \[
+        R_k = \int_0^1 \frac{(1-t)^{k-1}}{(k-1)!} P_{t\to0}^\gamma \left(\nabla^kX_{\gamma(t)}\underbrace{(\dot{\gamma}(t),\cdots,\dot{\gamma}(t))}_{k\text{ times}}\right) dt
+        \]
+\end{theorem}
+\begin{proof}
+        The proof is similar to the Taylor expansion of a function in Euclidean space. The only thing we need to do is to use parallel transport to pullback the vector field to the tangent space at $p$ and use the covariant derivative instead of the usual derivative.
+
+        We define
+        \[
+        Y(t) = P_{t\to0}^\gamma X_{\gamma(t)}
+        \]
+        then $Y:[0,1]\to T_pM$ is a curve in the tangent space at $p$. Let $\{e_i\}_{1\leq i \leq n}$ is an orthonormal basis of $T_p M$, and $\{E_i(t)\}_{1\leq i \leq n}$ is the parallel transport of $\{e_i\}_{1\leq i \leq n}$ along $\gamma$, then $\{E_i(t)\}_{1\leq i \leq n}$ is an orthonormal basis of $T_{\gamma(t)} M$. We can write $X_{\gamma(t)}$ as
+        \[
+        X_{\gamma(t)} = X^i(t) E_i(t)
+        \]
+        here we use Einstein summation convention. Since $E_i(t)$ is parallel along $\gamma$, we have
+        \begin{equation}\label{parallel_derivative}
+                \nabla_{\dot{\gamma}} X_{\gamma(t)} = \dot{X}^i(t) E_i(t) + X^i(t) \nabla_{\dot{\gamma}} E_i(t) = \dot{X}^i(t) E_i(t)
+        \end{equation}
+        thus
+        \begin{equation}
+                Y(t) = P_{t\to0}^\gamma \left(X^i(t) E_i(t)\right) = X^i(t) e_i
+        \end{equation}
+        now that $Y(t)$ is a curve in the vector space $T_p M$ which is isomorphic to $\RR^n$, we can use the Taylor expansion of a function in Euclidean space to write $Y(t)$ as
+        \begin{equation}
+                \dot{Y}(t) = \dot{X}^i(t) e_i = P_{t\to 0}\left(\dot{X}^i(t) E_i(t)\right) = P_{t\to0}^\gamma \left(\nabla_{\dot{\gamma}} X_{\gamma(t)}\right) 
+        \end{equation}
+        the last equality is from \eqref{parallel_derivative}. We can repeat the above process to get
+        \begin{equation}\label{higher_derivative}
+                Y^{(i)}(t) = P_{t\to0}^\gamma \left(\nabla^i X_{\gamma(t)}\underbrace{(\dot{\gamma}(t),\cdots,\dot{\gamma}(t))}_{k\text{ times}}\right)
+        \end{equation}
+        since $Y(t)$ is a curve in the vector space $T_p M$ which is isomorphic to $\RR^n$, we can use the Taylor expansion of a function in Euclidean space to write $Y(t)$ as
+        \begin{equation}\label{taylor_in_euclidean}                
+        Y(t) = Y(0) + \sum_{i=1}^{k-1} \frac{t^i}{i!} Y^{(i)}(0) + R_k
+        \end{equation}
+        where the remainder term $R_k$ is given by
+        \begin{equation}\label{remainder_in_euclidean}
+                R_k = \int_0^1 \frac{(1-t)^{k-1}}{(k-1)!} Y^{(k)}(t) dt = \int_0^1 \frac{(1-t)^{k-1}}{(k-1)!} P_{t\to0}^\gamma \left(\nabla^k_{\dot{\gamma}} X_{\gamma(t)}\right) dt
+        \end{equation}
+        combining \eqref{higher_derivative}, \eqref{taylor_in_euclidean} and \eqref{remainder_in_euclidean}, and $\dot{\gamma}(0) = v$, we have
+        \[
+        P_{1\to0}^\gamma X_{\gamma(1)} = Y(1) = Y(0) + \sum_{i=1}^{k-1} \frac{1}{i!} Y^{(i)}(0) + R_k = X_p + \sum_{i=1}^{k-1}\frac{1}{i!} \nabla^i_{\dot{\gamma}} X_p\underbrace{(v,\cdots,v)}_{i\text{ times}} + R_k
+        \]
+\end{proof}
+\begin{remark}
+        Since $\gamma$ is a geodesic, we have
+        \[
+        \nabla^2 X_{\gamma(t)}(\dot{\gamma}(t),\dot{\gamma}(t)) = \nabla_{\dot{\gamma}} \left(\nabla_{\dot{\gamma}} X\right)_{\gamma(t)} - \nabla_{\nabla_{\dot{\gamma}} \dot{\gamma}} X_{\gamma(t)} = \nabla_{\dot{\gamma}} \left(\nabla_{\dot{\gamma}} X\right)_{\gamma(t)}
+        \]
+        the higher order covariant derivative can be computed by
+        \[
+\nabla^i X_{\gamma(t)}(\dot{\gamma}(t),\cdots,\dot{\gamma}(t)) = \left(\underbrace{\nabla_{\dot{\gamma}} \nabla_{\dot{\gamma}}\left(\cdots \nabla_{\dot{\gamma}} X\right)}_{i\text{ times}}\right)_{\gamma(t)}
+        \]
+\end{remark}
+Similar to Quasi-Newton's method in Euclidean space, we can use the Taylor expansion of the Riemannian gradient to derive the secant equation on Riemannian manifolds. 
+
+Let $f: M \to \RR$ is a smooth function on a Riemannian manifold $(M,g)$, and the curve $\gamma_k: [0,1] \to M$ is a geodesic that connects $x^k$ and $x^{k+1}$. Denote the initial velocity of $\gamma_k$ by $s^k_0$, we have
+\[
+s^k_0 = \exp_{x^k}^{-1}(x^{k+1}) = \dot{\gamma}_k(0)
+\]
+if we avoid the remainder term, we have
+\[
+\begin{aligned}
+P_{1\to0}^{\gamma_k} \grad f(x^{k+1}) = \grad f(x^k) + \nabla_{s^k_0} \grad f(x^k) + R\\
+= \grad f(x^k) + \hess f(x^k)[s^k_0] + R
+\end{aligned}
+\]
+where $R$ is the remainder term. But the left term is in $T_{x^k} M$, we use the parallel transport to push it to $T_{x^{k+1}} M$, we have
+\[
+        \begin{aligned}
+        \grad f(x^{k+1}) &= P_{0\to1}^{\gamma_k} \grad f(x^k) + P_{0\to1}^{\gamma_k} \left(\hess f(x^k)[s^k_0]\right) + R
+        \end{aligned}
+\]
+finally we avoid $R$ and we have the secant equation on Riemannian manifolds
+\begin{equation}
+        \grad f(x^{k+1}) = P_{0\to1}^{\gamma_k} \grad f(x^k) + \mathcal{B}^{k+1}[P_{0\to1}^{\gamma_k} (s^k_0)]
+\end{equation}
+if we use $y^k$ to denote $\grad f(x^{k+1}) - P_{0\to1}^{\gamma_k} \grad f(x^k)$ and $s^k$ to denote $P_{0\to1}^{\gamma_k} (s^k_0)$, we have
+\begin{equation}\label{secant_equation_riemannian}
+        y^k = \mathcal{B}^{k+1} s^k
+\end{equation}
+which is the secant equation on Riemannian manifolds. Similar to the Euclidean case, we hope $\mathcal{B}^{k+1}$ is a positive definite operator, that is
+\begin{equation}\label{curvature_condition_riemannian}
+        g_{x^{k+1}}(s^k, y^k) > 0
+\end{equation}
+which is the curvature condition on Riemannian manifolds. 
+\subsection{Secant Equation with General Retraction and Vector Transport}
+It is worth noting that all the above discussion is based on the geodesic $\gamma_k$ that connects $x^k$ and $x^{k+1}$, in other words, we use the exponential map to define the secant equation on Riemannian manifolds. We can also use a general retraction to define the secant equation on Riemannian manifolds, which is given by
+\begin{equation}
+        y^k = \mathcal{B}^{k+1} s^k
+\end{equation}
+where $s^k = P_{0\to1}^{\gamma_k} (R_{x^k}^{-1}(x^{k+1}))$. The only possible issue is that in the second order term
+\[
+\ddot{Y}(t) = P_{t\to0}^\gamma \left(\nabla_{\dot{\gamma}} \left(\nabla_{\dot{\gamma}} X\right)_{\gamma(t)}\right) = P_{t\to0}^\gamma\left(\nabla^2_{\dot{\gamma}} X_{\gamma(t)} + \nabla_{\nabla_{\dot{\gamma}} \dot{\gamma}} X_{\gamma(t)}\right)
+\]
+when $t = 0$, it turns to
+\[
+\ddot{Y}(0) = \nabla^2_{\dot{\gamma}} X_p + \nabla_{\nabla_{\dot{\gamma}} \dot{\gamma}} X_p
+\]
+therefore, when we use a general retraction to define the secant equation on Riemannian manifolds, we want to let the extra term $\nabla_{\nabla_{\dot{\gamma}} \dot{\gamma}} X_p$ vanish, then everything will be the same as the case of using the exponential map. 
+
+\subsection{Broyden's Update on Riemannian Manifolds}
+As in the Euclidean space the matrix $B^{k+1}$ solves the optimization problem \eqref{DFP_optimization_problem}, we can also define the DFP update on Riemannian manifolds by solving the following optimization problem
+\begin{equation}\label{DFP_optimization_problem_riemannian}
+        \begin{aligned}
+                \min_{\mathcal{B}} &\quad \|\mathcal{B} - \mathcal{B}^k\|_W \\
+                \st &\quad \mathcal{B} = \mathcal{B}^\adj, \\
+                &\quad \mathcal{B} s^k = y^k
+        \end{aligned}
+\end{equation}
+where $\|\mathcal{A}\|_W = \|W^{1/2}G^{1/2}\mathcal{A}G^{1/2}W^{1/2}\|_F$ and $G$ is the matrix representation of the Riemannian metric defined by $G_{ij} = g_{ij}$. We then have the following DFP update on Riemannian manifolds
+\begin{equation}\label{DFP_update_riemannian}
+        \mathcal{B}^{k+1} = \left(\mathrm{id} - \frac{y^k(s^k)^\flat}{g(y_k,s_k)}\right) \tilde{\mathcal{B}}^k \left(\mathrm{id} - \frac{s^k(y^k)^\flat}{g(y_k,s_k)}\right) + \frac{y^k (y^k)^\flat}{g(y_k,s_k)}
+\end{equation}
+where $\flat: T_p M \to T_p^* M$ is the musical isomorphism defined by $v^\flat(w) = g_p(v,w)$ for all $v,w \in T_p M$, and $\tilde{\mathcal{B}}^k$ is defined as
+\[
+\tilde{\mathcal{B}}^k = P_{0\to1}^{\gamma_k} \circ \mathcal{B}^k \circ P_{1\to0}^{\gamma_k}
+\]
+the parallel transport can be replaced by any isometric vector transport such as
+\begin{equation}
+        \tilde{\mathcal{B}}^k = \VT_{S_{\alpha^k\eta^k}} \circ \mathcal{B}^k \circ \VT_{S_{\alpha^k\theta^k}}^{-1}
+\end{equation}
+where $\mathcal{B}^k\eta^k = -\grad f(x^k)$ and $x^{k+1} = R_{x^k}(\alpha^k\eta^k)$. We do this transform is to map $\mathcal{B}^k$ from $T_{x^k} M$ to $T_{x^{k+1}} M$, and the isometry of the vector transport ensures that $\tilde{\mathcal{B}}^k$ is positive definite if $\mathcal{B}^k$ is positive definite, that is, the curvature condition is preserved.
+
+Similarly, we can also get the BFGS update on Riemannian manifolds 
+\begin{equation}\label{BFGS_update_riemannian}
+        \mathcal{B}^{k+1} = \tilde{\mathcal{B}}^k + \frac{y^k (y^k)^\flat}{g(y_k,s_k)} - \frac{\tilde{\mathcal{B}}^k s^k (\tilde{\mathcal{B}}^ks^k)^\flat }{g(s_k, \tilde{\mathcal{B}}^k s^k)}
+\end{equation}
+
+Then for any $\phi_k \in [0,1]$, we can combine the DFP update and the BFGS update to get the Broyden's update on Riemannian manifolds
+\begin{equation}\label{Broyden_update_riemannian}
+        \begin{aligned}
+         \mathcal{B}^{k+1} &= (1-\phi_k)\mathcal{B}^k_{\mathrm{BFGS}} + \phi_k \mathcal{B}^k_{\mathrm{DFP}}\\
+         \mathcal{B}^{k+1}(\cdot) &= \tilde{\mathcal{B}}^k(\cdot) + \frac{y^k (y^k)^\flat(\cdot)}{g(y_k,s_k)} - \frac{\tilde{\mathcal{B}}^k s^k (\tilde{\mathcal{B}}^ks^k)^\flat(\cdot)}{g(s_k, \tilde{\mathcal{B}}^k s^k)} + \phi_kg(s^k, \tilde{\mathcal{B}}^k s^k)v^k(v^k)^\flat(\cdot)
+        \end{aligned}
+\end{equation}
+where
+\[
+v^k = \frac{y^k}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^k s^k}{g(s^k, \tilde{\mathcal{B}}^k s^k)}
+\]
+we usually choose $\phi_k$ in the interval $(\phi_k^c,\infty)$ where $\phi_k^c$ is given by
+\begin{equation}
+        \begin{aligned}
+                \phi_k^c &= \frac{1}{1-\mu^k}\\
+                \mu^k &= \left(\frac{1}{g(y^k,s^k)}\right)^2g(y^k, (\tilde{\mathcal{B}}^k)^{-1} y^k)g(s^k, \tilde{\mathcal{B}}^k s^k)
+        \end{aligned}
+\end{equation}
+\subsection{Wolfe Line Search on Riemannian Manifolds}
+The Euclidean Wolfe conditions \eqref{armijo_condition} and \eqref{curvature_condition_wolfe} can be easily generalized to Riemannian manifolds by replacing the Euclidean inner product with the Riemannian metric. Let $\mathcal{B}^k\eta^k = -\grad f(x^k)$ and $x^{k+1} = R_{x^k}(\alpha^k\eta^k)$. Fix any $0<c_1<c_2<1$, the Wolfe conditions on Riemannian manifolds are given by
+\begin{align}
+        f(x^{k+1}) \leq f(x^k) + c_1\alpha^k g_{x^k}(\grad f(x^k), \eta^k),\label{armijo_condition_riemannian}\\
+        \frac{d}{dt}f\left(R_{x^k}(t\eta^k)\right)\Big|_{t=\alpha^k} \geq c_2\frac{d}{dt}f\left(R_{x^k}(t\eta^k)\right)\Big|_{t=0} \label{curvature_condition_wolfe_riemannian}
+\end{align}
+\subsection{Locking Condition}
+We assume $\VT_{R}$ and $\VT_{S}$ satisfy
+\begin{align}
+        \|\VT_{R_\eta}-\VT_{S_\eta}\|_p &\leq \delta \|\eta\|, \\
+        \|\VT^{-1}_{R_\eta}-\VT^{-1}_{S_\eta}\|_p &\leq \delta \|\eta\|, \quad 
+\end{align}
+for all $p\in M$ and $\eta \in T_p M$, where $\delta$ is a fixed constant. We then have the following locking condition
+\begin{equation}\label{locking_condition}
+        \begin{aligned}
+                \VT_{S_\eta}\eta = \beta\VT_{R_\eta}\eta\\
+                \beta = \frac{\|\eta\|}{\|\VT_{R_\eta}\eta\|}
+        \end{aligned}
+\end{equation}
+if locking condition is satisfied, we have $\VT_{S_\eta}\eta = \beta\VT_{R_\eta}\eta$, and
+\begin{equation}
+        \begin{aligned}
+                g(\VT_{S_\eta}\eta, \VT_{S_\eta}\eta) &= \beta^2 g(\VT_{R_\eta}\eta, \VT_{R_\eta}\eta) = g(\eta, \eta)
+                &= \beta^2 g(\eta, \eta)\\
+        \end{aligned}
+\end{equation}
+which assures the curvature condition is preserved when we use $\VT_S$ to push out $\mathcal{B}^k$.
+\subsection{The Frame of Riemannian Broyden's Method}
+
+The Riemannian Broyden's method is given by the following algorithm.
+\begin{breakablealgorithm}\label{Riemannian_Broyden's_Method}
+        \caption{Riemannian Broyden's Method}
+        \begin{algorithmic}[1]
+                \Require A Riemannian manifold $(M,g)$, a retraction $R$, an isometric vector transport $\mathcal{T}_S$ with $R$ as associated retraction, a second differentiable function $f: M \to \RR$, an initial point $x^0 \in M$, an initial positive definite operator $\mathcal{B}^0: T_{x_0} M \to T_{x_0} M$, a sequence $\{\phi_k\}_{k\geq 0}$ in $[0,1]$, Wolfe line search parameters $0<c_1<c_2<1$ and a tolerance $\epsilon > 0$.
+                \State $k\gets1$;
+                \While{$\|\grad f(x^k)\|_{x^k} > \epsilon$}
+                \State Compute search direction $\eta^k \gets -(\mathcal{B}^k)^{-1} \grad f(x^k)$;
+                \State Set $\alpha^k \gets$ as step size that satisfies the Wolfe conditions \eqref{armijo_condition_riemannian} and \eqref{curvature_condition_wolfe_riemannian}
+                \begin{align*}
+                                f(x^{k+1}) \leq f(x^k) + c_1\alpha^k g_{x^k}(\grad f(x^k), \eta^k),\\
+        \frac{d}{dt}f\left(R_{x^k}(t\eta^k)\right)\Big|_{t=\alpha^k} \geq c_2\frac{d}{dt}f\left(R_{x^k}(t\eta^k)\right)\Big|_{t=0}
+                \end{align*}
+                \State Update $x^{k+1} \gets R_{x^k}(\alpha^k\eta^k)$;
+                \State Let $s^k \gets \VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k)$ and $y^k \gets (\beta^k)^{-1}\grad f(x^{k+1}) - \VT_{S_{\alpha^k\eta^k}}(\grad f(x^k))$, where
+                \[
+                \beta^k = \frac{\|\alpha_k\eta_k\|_{x^k}}{\|\VT_{R_{\alpha^k\eta^k}}(\alpha^k\eta^k)\|_{x^{k+1}}}
+                \]
+                and $\VT_{R_{\alpha^k\eta^k}}$ is the differentiated retraction vector transport;
+                \State Push out $\tilde{\mathcal{B}}^k \gets \VT_{S_{\alpha^k\eta^k}} \circ \mathcal{B}^k \circ \VT_{S_{\alpha^k\eta^k}}^{-1}$;
+                \State Compute $\mathcal{B}^{k+1} \gets (1-\phi_k)\mathcal{B}^k_{\mathrm{BFGS}} + \phi_k \mathcal{B}^k_{\mathrm{DFP}}$ where $\mathcal{B}^k_{\mathrm{BFGS}}$ and $\mathcal{B}^k_{\mathrm{DFP}}$ are given by \eqref{BFGS_update_riemannian} and \eqref{DFP_update_riemannian} respectively, that is
+                \begin{equation*}
+        \begin{aligned}
+         \mathcal{B}^{k+1} &= (1-\phi_k)\mathcal{B}^k_{\mathrm{BFGS}} + \phi_k \mathcal{B}^k_{\mathrm{DFP}}\\
+         \mathcal{B}^{k+1}(\cdot) &= \tilde{\mathcal{B}}^k(\cdot) + \frac{y^k (y^k)^\flat(\cdot)}{g(y_k,s_k)} - \frac{\tilde{\mathcal{B}}^k s^k (\tilde{\mathcal{B}}^ks^k)^\flat(\cdot)}{g(s_k, \tilde{\mathcal{B}}^k s^k)} + \phi_kg(s^k, \tilde{\mathcal{B}}^k s^k)v^k(v^k)^\flat(\cdot)
+        \end{aligned}
+\end{equation*}
+where
+\[
+v^k = \frac{y^k}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^k s^k}{g(s^k, \tilde{\mathcal{B}}^k s^k)}
+\]
+and $\phi^k$ is a fixed parameter in the interval $(\phi_k^c,\infty)$ where $\phi_k^c$ is given by 
+\begin{equation*}
+        \begin{aligned}
+                \phi_k^c &= \frac{1}{1-\mu^k}\\
+                \mu^k &= \left(\frac{1}{g(y^k,s^k)}\right)^2g(y^k, (\tilde{\mathcal{B}}^k)^{-1} y^k)g(s^k, \tilde{\mathcal{B}}^k s^k)
+        \end{aligned}
+\end{equation*}
+and 
+\begin{equation*}
+    \tilde{\mathcal{B}}^k = \VT_{S_{\alpha^k\eta^k}} \circ \mathcal{B}^k \circ \VT_{S_{\alpha^k\eta^k}}^{-1}    
+\end{equation*}
+                \State $k\gets k+1$;
+                \EndWhile
+        \end{algorithmic}
+\end{breakablealgorithm}
+\newpage
+\section{Convergence Analysis}
+\subsection{Locking Condition}
+The following lemma shows that under the locking condition, the curvature condition is preserved under Wolfe line search.
+\begin{lemma}[Sylvester]
+        
+\end{lemma}
+\begin{lemma}\label{curvature_condition_riemannian_lemma}
+        The algorithm \ref{Riemannian_Broyden's_Method} will not stop unless the stopping criterion is satisfied. For all integer $k\geq 0$, the Hessian approximation $\mathcal{B}^k$ is self-adjoint and positive definite, and for $\eta^k\neq 0$ we have
+        \begin{equation}
+                g(s^k,y^k)\geq (c_2-1)\alpha^k g(\grad f(x^k), \eta^k) > 0
+        \end{equation}
+\end{lemma}
+\begin{proof}
+        If all quantities exist and $\eta^k\neq 0$, define $\widetilde{m}_k = f\left(R_{x^k}(t\eta^k/\|\eta^k\|)\right)$, we notice that
+        \begin{equation}\label{differentiation_of_curve_along_retraction}
+        \begin{aligned}
+        \frac{d}{dt}\widetilde{m}_k(t) &= \frac{d}{dt}f\left(R_{x^k}\left(\frac{t\eta^k}{\|\eta^k\|}\right)\right)\\
+        &= g_{R_{x^k}(t\eta^k/\|\eta^k\|)}\left(\grad f\left(R_{x^k}\left(\frac{t\eta^k}{\|\eta^k\|}\right)\right), \VT^R_{t\eta^k/\|\eta^k\|}\left(\frac{\eta^k}{\|\eta^k\|}\right)\right)\\
+        \end{aligned}
+        \end{equation}
+        then
+        \begin{equation}\label{curvature_condition_riemannian_proof}
+                \begin{aligned}
+                        g(s^k,y^k) &=g\left(\VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k), (\beta^k)^{-1}\grad f(x^{k+1}) - \VT_{S_{\alpha^k\eta^k}}(\grad f(x^k))\right)\\
+                        &= g\left((\beta^k)^{-1}\VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k), \grad f(x^{k+1})\right) - g\left(\VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k), \VT_{S_{\alpha^k\eta^k}}(\grad f(x^k))\right)\\
+                        &= g\left(\VT_{R_{\alpha^k\eta^k}}(\alpha^k\eta^k), \grad f(x^{k+1})\right) - g\left(\alpha^k\eta^k, \grad f(x^k)\right)\\
+                        &= \alpha^k\|\eta^k\|\left(g(\VT_{R_{\alpha^k\eta^k}}(\frac{\eta^k}{\|\eta^k\|}), \grad f(x^{k+1})) - g\left(\frac{\eta^k}{\|\eta^k\|}, \grad f(x^k)\right)\right)\\
+                        &= \alpha^k\|\eta^k\|\left(\frac{d\widetilde{m_k}(t)}{dt}\Big|_{t=\alpha^k\|\eta^k\|} - \frac{d\widetilde{m_k}(t)}{dt}\Big|_{t=0}\right)
+                \end{aligned}
+        \end{equation}
+        by Wolfe conditions, we have
+        \begin{equation}\label{curvature_condition_riemannian_proof_1}
+               \frac{d\widetilde{m_k}(t)}{dt}\Big|_{t=\alpha^k\|\eta^k\|} - \frac{d\widetilde{m_k}(t)}{dt}\Big|_{t=0}\geq(c_2-1)\frac{d\widetilde{m_k}(t)}{dt}\Big|_{t=0} = (c_2-1)g\left(\grad f(x^k), \frac{\eta^k}{\|\eta^k\|}\right)
+        \end{equation}
+        then combining \eqref{curvature_condition_riemannian_proof} and \eqref{curvature_condition_riemannian_proof_1}, we have
+        \begin{equation}\label{curvature_condition_riemannian_proof_2}
+                g(s^k,y^k) \geq (c_2-1)\alpha^k g(\grad f(x^k), \eta^k)
+        \end{equation}
+
+        We previously prove that $\mathcal{B}^k$ is self-adjoint and we derive other results by induction. When $k=0$, $\mathcal{B}^0$ is self-adjoint and positive definite by assumption, and $\eta^0\neq 0$ since $\grad f(x^0)\neq 0$. Assume the results hold for all $i\leq k$, we then have 
+        \[
+        g(s^k,y^k) \geq (c_2-1)\alpha^k g(\grad f(x^k), (\mathcal{B}^k)^{-1} \grad f(x^k)) > 0
+        \]
+        then
+        \[
+        \begin{aligned}
+                  \lambda(\mu^k) = \det\left(\mathcal{B}^{k+1}\right) &= \det\left(\tilde{\mathcal{B}}^k\right)\frac{g(y^k,s^k)}{g(s^k, \tilde{\mathcal{B}}^k s^k)}\left(1 + \phi_k\left(\frac{g(s^k, \tilde{\mathcal{B}}^k s^k)g(y^k, (\tilde{\mathcal{B}}^k)^{-1} y^k)}{g(y^k,s^k)^2} - 1\right)\right)\\
+                  &=  \det\left(\tilde{\mathcal{B}}^k\right)\frac{g(y^k,s^k)}{g(s^k, \tilde{\mathcal{B}}^k s^k)}\left(1 + \phi_k\left(\mu^k - 1\right)\right)
+        \end{aligned}
+        \]
+        then $\lambda(\phi^k) = 0$ if and only if $\phi^k = \phi_k^c$, since $\phi^k > \phi_k^c$, we have $\lambda(\phi^k) > 0$, which means $\mathcal{B}^{k+1}$ is positive definite. Since the eigenvalue of $\mathcal{B}^{k+1}$ is continuous with respect to $\phi^k$, by the intermediate value theorem, we only have to show that $\mathcal{B}^{k+1}$ is positive definite when $\phi^k = 0$, that is, the BFGS update is positive definite. We have
+        \[
+        \begin{aligned}
+                g(\xi,\mathcal{B}^{k+1}\xi) &= g\left(\xi, \frac{g(y^k,\xi)y^k}{g(y^k,s^k)} - \frac{g(\tilde{\mathcal{B}}^ks^k,\xi)\tilde{\mathcal{B}}^ks^k}{g(s^k, \tilde{\mathcal{B}}^k s^k)}\right) + g(\xi, \tilde{\mathcal{B}}^k\xi)\\
+                &= \frac{g^2(y^k,\xi)}{g(y^k,s^k)} - \frac{g^2(\tilde{\mathcal{B}}^ks^k,\xi)}{g(s^k, \tilde{\mathcal{B}}^k s^k)} + g(\xi, \tilde{\mathcal{B}}^k\xi)\\
+                &= \frac{g^2(y^k,\xi)}{g(y^k,s^k)} + \frac{1}{g(s^k, \tilde{\mathcal{B}}^k s^k)} \left(g(s^k, \tilde{\mathcal{B}}^k s^k)g(\xi, \tilde{\mathcal{B}}^k\xi) - g^2(\tilde{\mathcal{B}}^ks^k,\xi)\right)\\
+                &\geq \frac{g^2(y^k,\xi)}{g(y^k,s^k)} > 0
+        \end{aligned}
+        \]
+        then $\mathcal{B}^{k+1}$ is positive definite, the last inequality is from the Cauchy-Schwarz inequality. 
+\end{proof}
+\subsection{Basic Assumptions}
+We denote $\Omega_{x_0}$ as the level set of $f$ at $x_0$, that is
+\[
+\Omega_{x_0} = \{x\in M: f(x) \leq f(x_0)\}
+\]
+and $x^\ast$ is a local minimum of $f$ in $\Omega_{x_0}$. The exisitence of $x^\ast$ is guaranteed if $\Omega_{x_0}$ is compact. 
+\begin{definition}
+        Let $(M,g)$ be a Riemannian Manifold with retraction $R$, denote
+        \[
+        \widetilde{m}_{p,\eta}(t) = f\left(R_p(t\eta)\right)
+        \]
+        for all $p\in M$ and $\eta \in T_p M$ with $\|\eta\|_p=1$. We say $f$ is \emph{retraction-convex} with respect to $R$ in a subset $S$ of $M$ if for all $p\in S$ and $\eta \in T_p M$, the function $\widetilde{m}_{p,\eta}(t)$ is convex in $t$ and $R_p(t\eta)\in S$ for all $t$. If we replace the convexity of $\widetilde{m}_{p,\eta}(t)$ with strong convexity, we say $f$ is \emph{retraction strongly-convex} with respect to $R$ in $S$.
+\end{definition}
+\begin{assumption}\label{assumption_1}
+        The function $f$ is twice continuously differentiable, that is its pullback defined by $f\circ \varphi^{-1}$ is twice continuously differentiable for any chart $\varphi$. 
+\end{assumption}
+\begin{assumption}\label{assumption_2}
+        There exist $r>0$ and $\rho>0$ such that for each $y$ in the restraction neighborhood defined by
+        \[
+        \widetilde{\Omega}_p:= \{R_p(t\eta): p\in \Omega_{x_0}, \|\eta\|_p = 1, t\in [0,r)\}
+        \]
+        we have $\widetilde{\Omega}\subset R_y(B(0,\rho))$ where $B(0,\rho)$ is the ball in $T_y M$ with radius $\rho$ centered at $0$ and $R_y$ is diffeomorphism on $B(0,\rho)$. 
+\end{assumption}
+\begin{assumption}\label{assumption_3}
+        For all $t\in [0,\alpha^k]$, we have $R_{x^k}(t\eta^k)\in \widetilde{\Omega}_{x^k}$. And $f$ is strongly retraction-convex with respect to $R$ in $\overline{\widetilde{\Omega}_{x_0}}$.
+\end{assumption}
+\begin{lemma}
+        If Assumption \ref{assumption_1} and \ref{assumption_2} holds, then $f$ is retraction-convex with respect to exponential map in a open set $S$ if and only if $\hess f$ is positive definite in $S$. The Hessian here is with respect to the Levi-Civita connection.
+\end{lemma}
+\begin{proof}
+        It is easy to check it by
+        \[
+        \begin{aligned}
+                \frac{d^2}{dt^2}\widetilde{m}_{x,\eta}(t) &= \frac{d}{dt}g_{R_x(t\eta)}\left(\grad f\left(R_x(t\eta)\right), \VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right)\\
+                &= g_{R_x(t\eta)}\left(\nabla_{\VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)} \grad f\left(R_x(t\eta)\right), \VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right) \\ &\,\,\,\,\,\,+ g_{R_x(t\eta)}\left(\grad f\left(R_x(t\eta)\right), \nabla_{\VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)} \VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right)\\
+                &= g_{R_x(t\eta)}\left(\hess f\left(R_x(t\eta)\right)\left[\VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right], \VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right)
+        \end{aligned}
+        \]
+        the term $g_{R_x(t\eta)}\left(\grad f\left(R_x(t\eta)\right), \nabla_{\VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)} \VT^R_{t\eta}\left(\frac{\eta}{\|\eta\|}\right)\right)$ vanishes since $\VT^R$ is exponential map, then the curve is geodesic and the covariant derivative of $\VT^R$ along the curve is zero.
+\end{proof}
+Similarly, we have the same criterion for strong retraction-convexity.
+\begin{lemma}\label{criterion_strong_retraction_convexity}
+        If Assumption \ref{assumption_1} and \ref{assumption_2} holds, then $f$ is strongly retraction-convex with respect to exponential map in a open set $S$ if and only if $\hess f - \lambda_0\mathrm{id}$ is positive definite in $S$ for some $\lambda_0>0$. The Hessian here is with respect to the Levi-Civita connection.
+\end{lemma}
+\begin{lemma}
+        Suppose Assumption \ref{assumption_1} holds, and $\hess f(x^\ast)$ is positive definite. Recall denifiton of $\widetilde{m}_{p,\eta}(t)$, that is
+        \[
+\widetilde{m}_{p,\eta}(t) = f\left(R_p(t\eta)\right),\quad\|\eta\|_p = 1
+        \]
+        then there exist a neiborhood $U$ of $x^\ast$ and two constants $0<a_0<a_1$ such that 
+        \[
+        a_0\leq \frac{d^2\widetilde{m}_{x,\eta}}{dt^2}(t) \leq a_1
+        \]
+        for all $x\in U$ and $t$ satisfying $R_x(t\eta)\in U$.
+\end{lemma}
+\begin{proof}
+        Assume $\varphi:U\to\RR^n$ is a chart map, and fix a moving frame $\{e_1(x),\cdots,e_n(x)\}$ on $U$, then for any vector field $\xi$ defined on $U$, we can write
+        \[
+        \xi_p = \xi^i(p)e_i(p)
+        \]
+        here we use Einstein summation convention. Then we define
+        \[
+        u(\hat{x},\hat{\xi}) = f\left(R_{\varphi^{-1}(\hat{x})}\left(\xi^ie_i\left(\varphi^{-1}(\hat{x})\right)\right)\right)
+        \]
+        where $\hat{x} = \varphi(x)$ is the coordinate of $x$ in the chart, and $\hat{\xi} = (\xi^1,\cdots,\xi^n)$ is the coordinate of $\xi$ in the moving frame. Since $\{e_i\}_{1\leq i\leq n}$ is a moving frame, its Riemann metric in $x$ is given by $G_x = I_n$.Notice that $\widetilde{m}_{x,\eta}(t) = u(\hat{x}, t\hat{\eta})$, then
+        \[
+        \begin{aligned}
+                \frac{d^2\widetilde{m}_{x,\eta}}{dt^2}(t) &= \frac{d^2}{dt^2}u(\hat{x}, t\hat{\eta})\\
+                &= \hat{\eta}^\top \hess_\xi u(\hat{x}, t\hat{\eta}) \hat{\eta}\\
+        \end{aligned}
+        \]
+        we have $\|\hat{\eta}\|_2 = g_x(\eta,\eta) = 1$. Since $f$ is twice continuously differentiable, then $\hess_\xi u$ is continuous, and $\hess_\xi u(\hat{x}^\ast, 0) = \hess f(x^\ast)$ is positive definite. Therefore, there exist a neighborhood $U$ of $x^\ast$ and a constant $a_0>0$ such that $\hess_\xi u(\hat{x}, t\hat{\eta}) \geq a_0 I_n$ for all $x\in U$ and $t$ satisfying $R_x(t\eta)\in U$. 
+
+        When this $U$ is relatively compact, we can also get an upper bound for the eigenvalue of $\hess_\xi u(\hat{x}, t\hat{\eta})$ by the continuity of $\hess_\xi u$. Therefore, there exist a constant $a_1>0$ such that $\hess_\xi u(\hat{x}, t\hat{\eta}) \leq a_1 I_n$ for all $x\in U$ and $t$ satisfying $R_x(t\eta)\in U$.
+\end{proof} 
+\subsection{Preliminary Results}
+\begin{lemma}\label{lemma_1}
+        If Assumption \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} holds, then 
+        \begin{equation}
+                \frac{1}{2}a_0\|s^k\|^2 \leq (c_1-1)\alpha^k g(\grad f(x^k), \eta^k)
+        \end{equation}
+\end{lemma}
+\begin{proof}
+        This proof is quite direct, we have
+        \begin{equation*}
+                \begin{aligned}
+                        f(x^{k+1}) - f(x^k) &= \widetilde{m}_{x^k,\eta^k}(\alpha^k\|\eta^k\|) - \widetilde{m}_{x^k,\eta^k}(0)\\
+                        &= \frac{d}{dt}\widetilde{m}_{x^k,\eta^k}(t)\Big|_{t=0}\alpha^k\|\eta^k\| + \frac{1}{2}\frac{d^2}{dt^2}\widetilde{m}_{x^k,\eta^k}(t)\Big|_{t=\tau_k}(\alpha^k\|\eta^k\|)^2\\
+                        &= g(\grad f(x^k), \alpha^k\eta^k) + \frac{1}{2}\frac{d^2}{dt^2}\widetilde{m}_{x^k,\eta^k}(t)\Big|_{t=\tau_k}(\alpha^k\|\eta^k\|)^2\\
+                        &\geq g(\grad f(x^k), \alpha^k\eta^k) + \frac{1}{2}a_0(\alpha^k\|\eta^k\|)^2
+                \end{aligned}
+        \end{equation*}
+        by Wolfe line search, we have
+        \begin{equation*}
+                f(x^{k+1}) - f(x^k) \leq c_1\alpha^k g(\grad f(x^k), \eta^k)
+        \end{equation*}
+        combining the above two inequalities, and let $\|s^k\| = \|\VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k)\| = \|\alpha^k\eta^k\|$, we have
+        \begin{equation*}
+                \frac{1}{2}a_0\|s^k\|^2 \leq (c_1-1)\alpha^k g(\grad f(x^k), \eta^k)
+        \end{equation*}
+\end{proof}
+\begin{lemma}\label{lemma_2}
+        If Assumption \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} holds, then there exist two constants $0<b_0<b_1$ such that
+        \begin{equation}\label{lemma_2_eq}
+                b_0g(s^k,s^k)\leq g(s^k,y^k) \leq b_1 g(s^k,s^k)
+        \end{equation}
+\end{lemma}
+\begin{proof}
+        Recall that
+        \[
+        s_k = \mathcal{T}_S(\alpha_k \eta_k), \quad y_k = \beta_k^{-1}\grad f(x_{k+1}) - \mathcal{T}_S(\grad f(x_k))
+        \]
+        then
+        \[
+        \begin{aligned}
+            g(s^k,y^k) &= g\left(\mathcal{T}_S(\alpha_k \eta_k), \beta_k^{-1}\grad f(x_{k+1}) - \mathcal{T}_S(\grad f(x_k))\right)\\
+            &= \beta_k^{-1}g\left(\mathcal{T}_S(\alpha_k\eta_k),\, \grad f(x_{k+1})\right) - g\!\left(\mathcal{T}_S(\alpha_k\eta_k),\, \mathcal{T}_S(\grad f(x_k))\right)    
+        \end{aligned}
+        \]
+        since $\mathcal{T}_S$ is isometric, and $\beta_k$ is defined by
+        \[
+\beta_k = \frac{\|\alpha_k\eta_k\|}{\|\mathcal{T}_R(\alpha_k\eta_k)\|} = \frac{\|s^k\|}{\|\mathcal{T}_R(\alpha_k\eta_k)\|}
+        \]
+        by locking condition, we have $\beta_k^{-1}g\left(\mathcal{T}_S(\alpha_k\eta_k),\, \grad f(x_{k+1})\right) = g\left(\mathcal{T}_R(\alpha_k\eta_k),\, \grad f(x_{k+1})\right)$, then
+        \[
+        \begin{aligned}
+            g(s^k,y^k) &= g\left(\mathcal{T}_R(\alpha_k\eta_k),\, \grad f(x_{k+1})\right) - g\!\left(\mathcal{T}_S(\alpha_k\eta_k),\, \mathcal{T}_S(\grad f(x_k))\right)\\
+            &= g\left(\mathcal{T}_R(\alpha_k\eta_k),\, \grad f(x_{k+1})\right) - g\!\left(\alpha_k\eta_k,\, \grad f(x_k)\right)\\
+            &= \alpha_k\|\eta_k\|\left(g\left(\mathcal{T}_R\left(\frac{\eta_k}{\|\eta_k\|}\right),\, \grad f(x_{k+1})\right) - g\!\left(\frac{\eta_k}{\|\eta_k\|},\, \grad f(x_k)\right)\right)\\
+            &= \alpha_k\|\eta_k\|\left(\frac{d}{dt}f\left(R_{x^k}(t\eta^k/\|\eta^k\|)\right)\Big|_{t=\alpha^k\|\eta^k\|} - \frac{d}{dt}f\left(R_{x^k}(t\eta^k/\|\eta^k\|)\right)\Big|_{t=0}\right)\\
+            &= \alpha_k\|\eta_k\|\left(\frac{d}{dt}\widetilde{m}_k(t)\Big|_{t=\alpha^k\|\eta^k\|} - \frac{d}{dt}\widetilde{m}_k(t)\Big|_{t=0}\right)\\
+            &=  \alpha_k\|\eta_k\|\int_0^{\alpha^k\|\eta^k\|}\frac{d^2}{dt^2}\widetilde{m}_k(t)dt\\
+        \end{aligned}
+        \]
+        then
+        \[
+        \frac{g(s^k,y^k)}{g(s^k,s^k)} = \frac{1}{\alpha_k\|\eta_k\|}\int_0^{\alpha^k\|\eta^k\|}\frac{d^2}{dt^2}\widetilde{m}_k(t)dt
+        \]
+        since $f$ is strongly retraction-convex with respect to $R$ in $\overline{\widetilde{\Omega}_{x_0}}$, we have $b_0\leq \frac{d^2}{dt^2}\widetilde{m}_k(t) \leq b_1$ for some constants $0<b_0<b_1$, then
+        \[
+        b_0 \leq \frac{g(s^k,y^k)}{g(s^k,s^k)} \leq b_1
+        \]
+\end{proof}
+\begin{lemma}\label{lemma_3}
+        If Assumption \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} holds, then there exist two positive constants $0<a_2<a_3$ such that
+        \begin{equation}\label{lemma_3_eq}
+                a_2\|\grad f(x^k)\|\cos\theta_k \leq \|s^k\| \leq a_3\|\grad f(x^k)\|\cos\theta_k
+        \end{equation}
+        for all $k\geq 0$, where $\theta_k$ is the angle between $\grad f(x^k)$ and $\eta^k$ defined by
+        \[
+        \cos\theta_k = \frac{-g(\grad f(x^k), \eta^k)}{\|\grad f(x^k)\|\|\eta^k\|}
+        \]
+\end{lemma}
+\begin{proof}
+        By \eqref{curvature_condition_riemannian_proof_2}, we have
+        \[
+        \begin{aligned}
+                g(s^k,y^k) &\geq (c_2-1)\alpha^k g(\grad f(x^k), \eta^k) = \|\grad f(x^k)\|\|\eta^k\|\cos\theta_k\\
+        &= \alpha^k(1-c_2)\|s^k\|\|\grad f(x^k)\|\cos\theta_k
+        \end{aligned}
+        \]
+        then by \eqref{lemma_2_eq} we obtain
+        \[
+        \|s^k\|\geq a_2\|\grad f(x^k)\|\cos\theta_k
+        \]
+        where $a_2 = (1-c_2)/b_1$. 
+
+        On the other hand, by \eqref{lemma_1}, we have
+        \[
+        (c_1-1)\alpha^k g(\grad f(x^k), \eta^k) \geq \frac{1}{2}a_0\|s^k\|^2 
+        \]
+        which means
+        \[
+        (1-c_1)\|\grad f(x^k)\|\|s^k\|\cos\theta_k \geq \frac{1}{2}a_0\|s^k\|^2
+        \]
+        then
+        \[
+        \|s^k\| \leq a_3\|\grad f(x^k)\|\cos\theta_k
+        \]
+        where $a_3 = 2(1-c_1)/a_0$.
+\end{proof}
+The following lemma shows the two vector transportations $\VT_S$ and $\VT_R$ are close to each other when the step size is small, which is a direct consequence of the locking condition.
+\begin{lemma}
+        Let $\VT_1\in C^0$ and $\VT_2\in C^\infty$ where $\VT_1$ and $\VT_2$ are two vector transportations on $M$ along $R$. If $\VT_1$ and $\VT_2$ satisfies the locking condition, then for any $\overline{x}\in M$, there exists a constant $a_4>0$ and a neighborhood $U$ of $\overline{x}$ such that for all $x,y\in U$ and $\xi\in T_x M$, we have
+        \begin{equation*}
+                \|(\VT_1 - \VT_2)_\xi\| \leq a_4\|\xi\|\|\eta\|
+        \end{equation*}
+        where $\eta = R_x^{-1}(y)$ is the tangent vector at $x$ such that $R_x(\eta) = y$.
+\end{lemma}
+\begin{proof}
+        Choose an orthonormal frame $\{e_i(x)\}$ in a neighborhood of $\overline{x}$, so that the metric matrix $G_x = I$ throughout this neighborhood. For any $x$ in this neighborhood and $\eta \in T_x M$, define the coordinate matrices $L_R(\hat{x}, \hat{\eta})$ and $L_2(\hat{x}, \hat{\eta})$ of $\VT_{R,\eta}$ and $\VT_{2,\eta}$ respectively by
+        \[
+                \VT_{R_\eta}\xi = \sum_i \bigl(L_R(\hat{x},\hat{\eta})\hat{\xi}\bigr)^i e_i\bigl(R_x(\eta)\bigr), \qquad
+                \VT_{2_\eta}\xi = \sum_i \bigl(L_2(\hat{x},\hat{\eta})\hat{\xi}\bigr)^i e_i\bigl(R_x(\eta)\bigr),
+        \]
+        where $\hat{\xi}, \hat{\eta} \in \mathbb{R}^n$ are the coordinate representations of $\xi, \eta$ in the orthonormal frame. Concretely,
+        \[
+                \bigl(L_R(\hat{x},\hat{\eta})\bigr)_{ij} = g\bigl(e^i(R_x(\eta)),\, dR_x\big|_\eta[e_j(x)]\bigr), \qquad
+                \bigl(L_2(\hat{x},\hat{\eta})\bigr)_{ij} = g\bigl(e^i(R_x(\eta)),\, \VT_{2,\eta}[e_j(x)]\bigr).
+        \]
+        by the triangle inequality, inserting $\VT_{R,\eta}\xi$ as an intermediate term,
+        \begin{equation}\label{VT_triangle}
+                \|\VT_{1_\eta}\xi - \VT_{2_\eta}\xi\| \leq \underbrace{\|\VT_{1_\eta}\xi - \VT_{R_\eta}\xi\|}_{(A)} + \underbrace{\|\VT_{R_\eta}\xi - \VT_{2_\eta}\xi\|}_{(B)}.
+        \end{equation}
+
+        Since $\VT_1$ satisfies the locking condition, by definition we have $\|\VT_{1_\eta} - \VT_{R_\eta}\| \leq \delta\|\eta\|$, hence
+        \[
+                (A) = \|(\VT_{1_\eta} - \VT_{R_\eta})\xi\| \leq \delta\|\eta\|\|\xi\| =: b_0\|\xi\|\|\eta\|.
+        \]
+
+        In the orthonormal moving frame, we have
+        \[
+                (B) \leq b_1 \|(L_R(\hat{x},\hat{\eta}) - L_2(\hat{x},\hat{\eta}))\hat{\xi}\|_2 \leq b_1\|\hat{\xi}\|_2\,\|L_R(\hat{x},\hat{\eta}) - L_2(\hat{x},\hat{\eta})\|_2.
+        \]
+        We notice that at $\hat{\eta} = 0$, both matrix-valued functions reduce to the identity. Hence $L_R(\hat{x},0) - L_2(\hat{x},0) = 0$. Since $\VT_2 \in C^\infty$, the map $\hat{\eta} \mapsto L_2(\hat{x},\hat{\eta})$ is smooth, and a first-order Taylor expansion in $\hat{\eta}$ around $0$ gives
+        \[
+                \|L_R(\hat{x},\hat{\eta}) - L_2(\hat{x},\hat{\eta})\|_2 \leq b_2'\|\hat{\eta}\|_2,
+        \]
+        so $(B) \leq b_2\|\xi\|\|\eta\|$ for some constant $b_2 > 0$.
+
+        Substituting both estimates into \eqref{VT_triangle},
+        \[
+                \|\VT_{1_\eta}\xi - \VT_{2_\eta}\xi\| \leq (b_0 + b_2)\|\xi\|\|\eta\| =: a_4\|\xi\|\|\eta\|. \qedhere
+        \]
+\end{proof}
+The following lemma is a direct consequence of the previous lemma, which shows that $\VT_S$ and $\VT_R$ are close to each other when the step size is small.
+\begin{lemma}\label{lemma_4}
+        Let $M$ is a Riemannian manifold with retraction $R$ and $\VT_R$ denotes the differentiated retraction of $R$. Then there is a neighborhood $U$ of $\overline{x}$ and a constant $\tilde{a}_4>0$ such that for all $x\in U$, $\eta = R_x^{-1}y$ and $\xi\in T_x M$ with $\|\xi\| = 1$, we have
+        \begin{equation*}
+                \left|\|\VT_{R_\eta}\xi\|-1\right|\leq \tilde{a}_4\|\eta\|
+        \end{equation*}
+\end{lemma}
+\begin{proof}
+        In Lemma \ref{lemma_3} we choose $\VT_1 = \VT_S$ and $\VT_2 = \VT_R$ then the proof is completed by the previous lemma.
+\end{proof}
+The following lemma is a generalization of the Zoutendijk condition in the Euclidean case.
+\begin{lemma}\label{lemma_5}
+        If Assumption \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} holds, then for all $k\geq 0 $, there exists a constant $a_5>0$ such that
+        \begin{equation*}
+                f(x^{k+1}) - f(x^k) \leq (1-a_5\cos^2\theta_k)f(x^k) - f(x^\ast)
+        \end{equation*}
+        where $\theta_k$ is the angle between $\grad f(x^k)$ and $\eta^k$ defined by
+        \[
+        \cos\theta_k = \frac{-g(\grad f(x^k), \eta^k)}{\|\grad f(x^k)\|\|\eta^k\|}
+        \]
+\end{lemma}
+\begin{proof}
+        Let $z^k = \|R_{x^\ast}^{-1}(x^k)\|$, and $\zeta^k$ is its unit vector, that is $\zeta^k = R_{x^\ast}^{-1}(x^k)/z^k$. We define
+        \[
+        m_k(t) = f\left(R_{x^\ast}(z^k + t\zeta^k)\right)
+        \]
+        then by Taylor expansion, we have
+        \begin{equation}
+                m_k(0) - m_k(z^k) = -\frac{d}{dt}m_k(t)\Big|_{t=0}z^k - \frac{1}{2}\frac{d^2}{dt^2}m_k(t)\Big|_{t=\tau_k}(z^k)^2
+        \end{equation}
+        where $\tau_k\in [0,z^k]$. By Assumption \ref{assumption_3}, we have
+        \[
+        \frac{d}{dt}m_k(t)\Big|_{t=z^k}\geq \frac{1}{2}a_0z^k
+        \]
+        since the second derivative of $m_k$ is bounded from below by $a_0$, then
+        \begin{equation}
+                \begin{aligned}
+                        f(x^k) - f(x^\ast) &\leq \frac{d}{dt}m_k(t)\Big|_{t=0}z^k\\
+                        &\leq \frac{2}{a_0}\left(\frac{d}{dt}m_k(t)\Big|_{t=0}\right)^2\\
+                        &= \frac{2}{a_0}g^2\left(\grad f(x^k), \VT_{R_{z^k\zeta^k}}(\zeta^k)\right)\\
+                        &\leq b_0\|\grad f(x^k)\|^2
+                \end{aligned}
+        \end{equation}
+        where $b_0$ is a positive constant. On the other hand, by Lemma \ref{lemma_1}, we have
+        \[
+        \alpha^k g(\grad f(x^k), \eta^k) \leq -\frac{a_0}{2(1-c_1)}\|s^k\|^2
+        \]
+        Substituting into the first Wolfe condition \eqref{armijo_condition_riemannian}, we obtain
+        \[
+        f(x^{k+1}) - f(x^k) \leq c_1\alpha^k g(\grad f(x^k), \eta^k) \leq -\frac{c_1 a_0}{2(1-c_1)}\|s^k\|^2
+        \]
+        By Lemma \ref{lemma_3}, $\|s^k\| \geq a_2\|\grad f(x^k)\|\cos\theta_k$, hence
+        \[
+        f(x^{k+1}) - f(x^k) \leq -\frac{c_1 a_0 a_2^2}{2(1-c_1)}\|\grad f(x^k)\|^2\cos^2\theta_k =: -b_1\|\grad f(x^k)\|^2\cos^2\theta_k
+        \]
+        where $b_1 = \frac{c_1 a_0 a_2^2}{2(1-c_1)} > 0$. Combining with the previous estimate $$f(x^k) - f(x^\ast) \leq b_0\|\grad f(x^k)\|^2$$
+        we get
+        \[
+        \begin{aligned}
+                f(x^{k+1}) - f(x^\ast) &= \left(f(x^{k+1}) - f(x^k)\right) + \left(f(x^k) - f(x^\ast)\right)\\
+                &\leq -b_1\|\grad f(x^k)\|^2\cos^2\theta_k + \left(f(x^k) - f(x^\ast)\right)\\
+                &\leq -\frac{b_1}{b_0}\cos^2\theta_k\left(f(x^k) - f(x^\ast)\right) + \left(f(x^k) - f(x^\ast)\right)\\
+                &= \left(1 - a_5\cos^2\theta_k\right)\left(f(x^k) - f(x^\ast)\right)
+        \end{aligned}
+        \]
+        where $a_5 = b_1/b_0 > 0$.
+\end{proof}
+\begin{lemma}\label{lemma_6}
+        If Assumption \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} holds, then there exists two constants $0<a_6<a_7$ such that
+        \begin{equation}
+        a_6\frac{g(s^k,\tilde{B}^ks^k)}{\|s^k\|^2}\leq\alpha^k \leq a_7\frac{g(s^k,\tilde{B}^ks^k)}{\|s^k\|^2}
+        \end{equation}
+\end{lemma}
+\begin{proof}
+        By Lemma \ref{lemma_1} and \ref{curvature_condition_riemannian_lemma}, we have
+        \[
+        \begin{aligned}
+                (1-c_2)g\left(s^k,\tilde{B}^ks^k\right) &= (c_2 - 1)(\alpha^k)^2 g\left(\grad f(x^k), \eta^k\right)\\
+                &\leq \alpha^k g(s^k,y^k) \leq \alpha^ka_1\|s^k\|^2
+        \end{aligned}
+        \]
+        therefore,
+        \[
+        \alpha^k \geq a_6\frac{g(s^k,\tilde{B}^ks^k)}{\|s^k\|^2}
+        \]
+        where $a_6 = (1-c_2)/a_1 > 0$. 
+        
+        On the other hand, by Lemma \ref{lemma_1} and \ref{curvature_condition_riemannian_lemma}, we have
+        \[
+        (c_1-1)\alpha^k g\left(\grad f(x^k), \eta^k\right) = (1-c_1)g\left(s^k,\tilde{B}^ks^k\right) = \frac{1-c_1}{\alpha^k}g\left(s^k,\tilde{B}^ks^k\right) \geq \frac{a_0}{2}\|s^k\|^2
+        \]
+        then
+        \[
+        \alpha^k \leq a_7\frac{g(s^k,\tilde{B}^ks^k)}{\|s^k\|^2}
+        \]
+        where $a_7 = 2(1-c_1)/a_0 > 0$.
+\end{proof}
+\begin{lemma}
+        Suppose Assumption \ref{assumption_1} holds, then for all $k\geq 0$, there is a constant $a_8>0$ such that
+        \begin{equation}
+                \|y^k\|^2\leq a_8 g(s^k,y^k)
+        \end{equation}
+\end{lemma}
+\begin{proof}
+        We define
+        \[
+        y^k_P = \grad f(x_{k+1}) - P^{\gamma^k}_{0\to 1}(\grad f(x_k))
+        \]
+        where $P$ is the parallel transportation along the retraction curve $\gamma^k$ connecting $x^k$ and $x^{k+1}$ such that $\gamma^k(t) = R_{x^k}(t\alpha^k\eta^k)$ for $t\in [0,1]$. We first show that
+        \begin{equation}
+                \|P^{\gamma^k}_{1\to 0}y^k_P-\overline{H}_k\alpha^k\eta^k\| \leq b_0\|s^k\|^2
+        \end{equation}
+        where $\overline{H}_k$ is defined by
+        \begin{equation}
+                \overline{H}_k = \int_0^1 P^{\gamma^k}_{t\to 0}\hess f(\gamma^k(t))P^{\gamma^k}_{0\to t}dt
+        \end{equation}
+        we define curve $\phi(t)$ by
+        \[
+        \phi(t) = P^{\gamma^k}_{t\to 0}\,\grad f(\gamma^k(t))
+        \]
+        then $\phi(0) = \grad f(x^k)$ and $\phi(1) = P^{\gamma^k}_{1\to 0}\grad f(x_{k+1})$. Then
+        \[
+        P^{\gamma^k}_{1\to 0}y^k_P = \phi(1) - \phi(0) = \int_0^1 \phi'(t)dt 
+        \]
+        we notice that
+        \[
+        \phi'(t) = P^{\gamma^k}_{t\to 0}\,\nabla_{\dot{\gamma}^k(t)}\grad f(\gamma^k(t)) = P^{\gamma^k}_{t\to 0}\,\hess f(\gamma^k(t))[\dot{\gamma}^k(t)]
+        \]
+        then
+        \[
+        P^{\gamma^k}_{1\to 0}y^k_P = \int_0^1 P^{\gamma^k}_{t\to 0}\,\hess f(\gamma^k(t))[\dot{\gamma}^k(t)]\,dt
+        \]
+        now we have
+        \[
+        P^{\gamma^k}_{1\to 0}y^k_P - \overline{H}_k\alpha^k\eta^k = \int_0^1 P^{\gamma^k}_{t\to 0}\,\hess f(\gamma^k(t))\Big[\dot{\gamma}^k(t) - P^{\gamma^k}_{0\to t}(\alpha^k\eta^k)\Big]\,dt
+        \]
+        It remains to estimate $\dot{\gamma}^k(t) - P^{\gamma^k}_{0\to t}(\alpha^k\eta^k)$. Let $V(t) = P^{\gamma^k}_{0\to t}(\alpha^k\eta^k)$ be the parallel transport of the initial velocity along $\gamma^k$, and define $W(t) = \dot{\gamma}^k(t) - V(t)$. Since $R$ is a retraction, by the first-order condition $dR_{x^k}\big|_0 = \mathrm{id}$, we have
+        \[
+        W(0) = \dot{\gamma}^k(0) - \alpha^k\eta^k = dR_{x^k}\big|_0[\alpha^k\eta^k] - \alpha^k\eta^k = 0
+        \]
+        Since $V$ is a parallel field ($\nabla_{\dot{\gamma}^k}V = 0$), we have
+        \[
+        \nabla_{\dot{\gamma}^k}W = \nabla_{\dot{\gamma}^k}\dot{\gamma}^k
+        \]
+        which is the ``acceleration'' of the retraction curve. Define $\hat{W}(t) = P^{\gamma^k}_{t\to 0}W(t)$, which pulls $W(t)$ back to $T_{x^k}M$ via parallel transport. Since parallel transport commutes with covariant differentiation along $\gamma^k$, we have
+        \[
+        \hat{W}'(t) = P^{\gamma^k}_{t\to 0}\left(\nabla_{\dot{\gamma}^k}W\right)(t) = P^{\gamma^k}_{t\to 0}\left(\nabla_{\dot{\gamma}^k}\dot{\gamma}^k\right)(t)
+        \]
+        Since $\gamma^k(t) = R_{x^k}(t\alpha^k\eta^k)$ and $R$ is smooth, the acceleration $\nabla_{\dot{\gamma}^k}\dot{\gamma}^k$ is bounded on any compact set. More precisely, there is a constant $C>0$ (depending only on $R$ and the compact neighborhood) such that
+        \[
+        \|\nabla_{\dot{\gamma}^k}\dot{\gamma}^k(t)\| \leq C\|\alpha^k\eta^k\|^2 = C\|s^k\|^2
+        \]
+        for all $t\in [0,1]$. Since parallel transport is an isometry, $\|\hat{W}'(t)\| = \|\nabla_{\dot{\gamma}^k}\dot{\gamma}^k(t)\| \leq C\|s^k\|^2$. Integrating from $0$ to $t$ with $\hat{W}(0) = W(0) = 0$, we obtain
+        \[
+        \|W(t)\| = \|\hat{W}(t)\| = \left\|\int_0^t \hat{W}'(\tau)\,d\tau\right\| \leq Ct\|s^k\|^2
+        \]
+        for all $t\in [0,1]$. Since parallel transport is an isometry and $\hess f$ is uniformly bounded (say by $L>0$) on the compact set $\overline{\widetilde{\Omega}_{x_0}}$, we conclude
+        \[
+        \left\|P^{\gamma^k}_{1\to 0}y^k_P - \overline{H}_k\alpha^k\eta^k\right\| \leq \int_0^1 L\cdot Ct\|s^k\|^2\,dt = \frac{CL}{2}\|s^k\|^2 =: b_0\|s^k\|^2
+        \]
+
+        Now we have
+        \[
+        \begin{aligned}
+                \|y^k\|\leq \|y^k_P\| + \|y^k - y^k_P\| &\leq \|P^{\gamma^k}_{1\to 0}y^k_P\| + \|P^{\gamma^k}_{1\to 0}y^k_P - \overline{H}_k\alpha^k\eta^k\| + \|\overline{H}_k\alpha^k\eta^k - y^k\|\\
+                &\leq \|P^{\gamma^k}_{1\to 0}y^k_P\| + b_0\|s^k\|^2 + \|\overline{H}_k\alpha^k\eta^k - y^k\|\\
+                &\leq \|P^{\gamma^k}_{1\to 0}y^k_P\| + b_0\|s^k\|^2 + \|\overline{H}_k - \tilde{B}^k\|\|s^k\|\\
+                &\leq \|P^{\gamma^k}_{1\to 0}y^k_P\| + b_1\|s^k\|^2
+        \end{aligned}
+        \]
+        where $b_1 = b_0 + \sup_k\|\overline{H}_k - \tilde{B}^k\|$. Since $\tilde{B}^k$ is uniformly positive definite, there is a constant $a_8 > 0$ such that $\|P^{\gamma^k}_{1\to 0}y^k_P\|^2 \leq a_8 g(s^k,y^k)$, hence
+        \[
+        \|y^k\|^2 \leq a_8 g(s^k,y^k) + b_2\|s^k\|^4
+        \]
+        where $b_2 = b_1^2 + 2\sqrt{a_8}b_1$. Since $\|s^k\|$ is bounded, we can choose a constant $a_9 > 0$ such that $b_2\|s^k\|^4 \leq a_9 g(s^k,y^k)$ for all $k$, hence
+        \[
+        \|y^k\|^2 \leq (a_8 + a_9) g(s^k,y^k) =: a_8' g(s^k,y^k). \qedhere
+        \]
+        replacing $a_8$ by $a_8'$ completes the proof.
+\end{proof}
+
+\begin{lemma}\label{lemma_8}
+        Suppose Assumptions \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} hold. Then there exist constants $a_{10}>0$, $a_{11}>0$, $a_{12}>0$ such that
+        \begin{align}
+                \frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{g(s^k,y^k)} &\leq a_{10}\alpha^k \label{ineq_8.1}\\
+                \frac{\|\tilde{\mathcal{B}}^ks^k\|^2}{g(s^k,\tilde{\mathcal{B}}^ks^k)} &\geq a_{11}\frac{\alpha^k}{\cos^2\theta_k} \label{ineq_8.2}\\
+                \frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(y^k,s^k)} &\leq a_{12}\frac{\alpha^k}{\cos\theta_k} \label{ineq_8.3}
+        \end{align}
+        for all $k$.
+\end{lemma}
+\begin{proof}
+        \textbf{Proof of \eqref{ineq_8.1}.} By \eqref{curvature_condition_riemannian_proof_2}, we have
+        \[
+        g(s^k,y^k) \geq (c_2-1)\alpha^k g(\grad f(x^k), \eta^k)
+        \]
+        Since $\mathcal{B}^k\eta^k = -\grad f(x^k)$ (Step 3 of Algorithm \ref{Riemannian_Broyden's_Method}) and $\tilde{\mathcal{B}}^k = \VT_S \circ \mathcal{B}^k \circ \VT_S^{-1}$, we have $\tilde{\mathcal{B}}^ks^k = -\alpha^k\VT_S(\grad f(x^k))$. Since $\VT_S$ is isometric,
+        \[
+        g(s^k, \tilde{\mathcal{B}}^ks^k) = -\alpha^k g(\VT_S(\alpha^k\eta^k), \VT_S(\grad f(x^k))) = -(\alpha^k)^2 g(\eta^k, \grad f(x^k))
+        \]
+        Therefore,
+        \[
+        g(s^k, y^k) \geq (1-c_2)\alpha^k\left(-g(\grad f(x^k), \eta^k)\right) = \frac{1-c_2}{\alpha^k}g(s^k, \tilde{\mathcal{B}}^ks^k)
+        \]
+        and thus
+        \[
+        \frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{g(s^k,y^k)} \leq a_{10}\alpha^k
+        \]
+        where $a_{10} = 1/(1-c_2)$.
+
+        \textbf{Proof of \eqref{ineq_8.2}.} By Step 3 of Algorithm \ref{Riemannian_Broyden's_Method} and the definition of $\cos\theta_k$,
+        \[
+        \frac{\|\tilde{\mathcal{B}}^ks^k\|^2}{g(s^k, \tilde{\mathcal{B}}^ks^k)} = \frac{(\alpha^k)^2\|\grad f(x^k)\|^2}{(\alpha^k)^2\|\eta^k\|\|\grad f(x^k)\|\cos\theta_k} = \frac{\alpha^k\|\grad f(x^k)\|}{\|s^k\|\cos\theta_k}
+        \]
+        By Lemma \ref{lemma_3}, $\|s^k\| \leq a_3\|\grad f(x^k)\|\cos\theta_k$, hence
+        \[
+        \frac{\|\tilde{\mathcal{B}}^ks^k\|^2}{g(s^k, \tilde{\mathcal{B}}^ks^k)} \geq \frac{\alpha^k\|\grad f(x^k)\|}{a_3\|\grad f(x^k)\|\cos^2\theta_k} = \frac{\alpha^k}{a_3\cos^2\theta_k} =: a_{11}\frac{\alpha^k}{\cos^2\theta_k}
+        \]
+        where $a_{11} = 1/a_3 > 0$.
+
+        \textbf{Proof of \eqref{ineq_8.3}.} By Step 3 of Algorithm \ref{Riemannian_Broyden's_Method},
+        \[
+        \frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(s^k,y^k)} \leq \frac{\alpha^k\|y^k\|\|\grad f(x^k)\|}{g(s^k,y^k)}
+        \]
+        By Lemma \ref{lemma_2}, $\|y^k\|^2 \leq a_8 g(s^k,y^k)$, so $\|y^k\| \leq a_8^{1/2}g^{1/2}(s^k,y^k)$. Substituting,
+        \[
+        \frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(s^k,y^k)} \leq \frac{a_8^{1/2}\alpha^k\|\grad f(x^k)\|}{g^{1/2}(s^k,y^k)}
+        \]
+        By \eqref{lemma_2_eq}, $g(s^k,y^k) \geq b_0\|s^k\|^2$, so $g^{1/2}(s^k,y^k) \geq b_0^{1/2}\|s^k\|$. Then
+        \[
+        \frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(s^k,y^k)} \leq \frac{a_8^{1/2}\alpha^k\|\grad f(x^k)\|}{b_0^{1/2}\|s^k\|}
+        \]
+        By Lemma \ref{lemma_3}, $\|s^k\| \geq a_2\|\grad f(x^k)\|\cos\theta_k$, hence
+        \[
+        \frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(s^k,y^k)} \leq \frac{a_8^{1/2}}{b_0^{1/2}a_2}\cdot\frac{\alpha^k}{\cos\theta_k} =: a_{12}\frac{\alpha^k}{\cos\theta_k}
+        \]
+        where $a_{12} = a_8^{1/2}/(b_0^{1/2}a_2) > 0$.
+\end{proof}
+
+\begin{lemma}\label{lemma_9}
+        Suppose Assumptions \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} hold, and $\phi_k\in [0,1]$. Then there exists a constant $a_{13}>0$ such that
+        \begin{equation}\label{product_alpha_lower_bound}
+                \prod_{j=1}^k \alpha^j \geq a_{13}^k
+        \end{equation}
+        for all $k\geq 1$.
+\end{lemma}
+\begin{proof}
+        Let $\hat{B}_k$ denote the coordinate matrix of $\mathcal{B}^k$ with respect to an orthonormal frame $\{e_i\}$. Since $\VT_S$ is an isometric vector transport, the push-out $\tilde{\mathcal{B}}^k = \VT_S\circ \mathcal{B}^k\circ \VT_S^{-1}$ preserves both the trace and the determinant in coordinates, that is,
+        \begin{equation}\label{trace_det_invariance}
+                \mathrm{trace}(\hat{B}_k) = \mathrm{trace}(\hat{\tilde{B}}_k), \qquad \det(\hat{B}_k) = \det(\hat{\tilde{B}}_k)
+        \end{equation}
+
+        From the Broyden update formula \eqref{Broyden_update_riemannian}, taking the trace in coordinates gives
+        \begin{equation}\label{trace_update}
+        \begin{aligned}
+                \mathrm{trace}(\hat{B}_{k+1}) &= \mathrm{trace}(\hat{B}_k) + \frac{\|y^k\|^2}{g(y^k,s^k)}\left(1 + \phi_k\frac{g(s^k, \tilde{\mathcal{B}}^ks^k)}{g(y^k,s^k)}\right)\\
+                &\quad + (\phi_k - 1)\frac{\|\tilde{\mathcal{B}}^ks^k\|^2}{g(s^k, \tilde{\mathcal{B}}^ks^k)} - 2\phi_k\frac{g(y^k,\tilde{\mathcal{B}}^ks^k)}{g(y^k,s^k)}
+        \end{aligned}
+        \end{equation}
+        We now bound each term. Since $\phi_k\leq 1$, the third term $$(\phi_k - 1)\frac{\|\tilde{\mathcal{B}}^ks^k\|^2}{g(s^k,\tilde{\mathcal{B}}^ks^k)}\leq 0$$ by the estimate $\|y^k\|^2\leq a_8\,g(s^k,y^k)$, we have $$\frac{\|y^k\|^2}{g(y^k,s^k)}\leq a_8$$
+        
+        By \eqref{ineq_8.1} that is $$\frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{g(y^k,s^k)}\leq a_{10}\alpha^k$$ and \eqref{ineq_8.3}, that is $$\frac{|g(y^k,\tilde{\mathcal{B}}^ks^k)|}{g(y^k,s^k)}\leq a_{12}\frac{\alpha^k}{\cos\theta_k}$$
+        substituting these into \eqref{trace_update}
+        \begin{equation}\label{trace_bound_intermediate}
+                \mathrm{trace}(\hat{B}_{k+1}) \leq \mathrm{trace}(\hat{B}_k) + a_8(1 + a_{10}\alpha^k) + 2a_{12}\frac{\alpha^k}{\cos\theta_k}
+        \end{equation}
+
+        It remains to bound $\frac{\alpha^k}{\cos\theta_k}$. By Lemma \ref{lemma_6}, we have $$\alpha^k \leq a_7\frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{\|s^k\|^2}$$ since 
+        \[
+        g(s^k, \tilde{\mathcal{B}}^ks^k) = (\alpha^k)^2\|\eta^k\|\|\grad f(x^k)\|\cos\theta_k, \quad \|s^k\|^2 = (\alpha^k)^2\|\eta^k\|^2
+        \]
+        we obtain
+        \begin{equation}\label{alpha_cos_bound}
+                \frac{\alpha^k}{\cos\theta_k} \leq a_7\frac{\|\grad f(x^k)\|}{\|\eta^k\|} = a_7\frac{\|\tilde{\mathcal{B}}^ks^k\|}{\|s^k\|}
+        \end{equation}
+        since $\tilde{\mathcal{B}}^k$ is positive definite, the largest eigenvalue is bounded by the trace:
+        \[
+        \frac{\|\tilde{\mathcal{B}}^ks^k\|}{\|s^k\|} \leq \lambda_{\max}(\tilde{\mathcal{B}}^k) \leq \mathrm{trace}(\hat{\tilde{B}}_k) = \mathrm{trace}(\hat{B}_k)
+        \]
+
+        Similarly, $\alpha^k \leq a_7\frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{\|s^k\|^2} \leq a_7\,\mathrm{trace}(\hat{B}_k)$. Substituting into \eqref{trace_bound_intermediate}
+        \[
+        \mathrm{trace}(\hat{B}_{k+1}) \leq \mathrm{trace}(\hat{B}_k)\left(1 + a_8 a_{10}a_7 + 2a_{12}a_7\right) + a_8
+        \]
+
+        Let $c_0 = 1 + a_8 a_{10}a_7 + 2a_{12}a_7 > 1$. By induction,
+        \[
+        \mathrm{trace}(\hat{B}_{k}) \leq c_0^k\,\mathrm{trace}(\hat{B}_0) + \frac{a_8(c_0^k - 1)}{c_0 - 1}
+        \]
+        hence there exists a constant $b_0>1$ such that
+        \begin{equation}\label{trace_geometric_bound}
+                \mathrm{trace}(\hat{B}_k) \leq b_0^k
+        \end{equation}
+        for all $k\geq 0$.
+
+        From the determinant formula for the Broyden update (see the proof of Lemma \ref{curvature_condition_riemannian_lemma}), since $\phi_k\in [0,1]$ and $\mu^k\geq 1$ by Cauchy--Schwarz inequality, we have $1+\phi_k(\mu^k-1)\geq 1$, and therefore
+        \begin{equation}\label{det_lower}
+                \det(\hat{B}_{k+1}) \geq \det(\hat{\tilde{B}}_k)\frac{g(y^k,s^k)}{g(s^k,\tilde{\mathcal{B}}^ks^k)} = \det(\hat{B}_k)\frac{g(y^k,s^k)}{g(s^k,\tilde{\mathcal{B}}^ks^k)}
+        \end{equation}
+        By \eqref{ineq_8.1}, $\frac{g(s^k,\tilde{\mathcal{B}}^ks^k)}{g(s^k,y^k)}\leq a_{10}\alpha^k$, so $\frac{g(y^k,s^k)}{g(s^k,\tilde{\mathcal{B}}^ks^k)}\geq \frac{1}{a_{10}\alpha^k}$. Iterating \eqref{det_lower} then it turns out that
+        \begin{equation}\label{det_iterated}
+                \det(\hat{B}_{k+1}) \geq \det(\hat{B}_1)\prod_{j=1}^{k}\frac{1}{a_{10}\alpha^j}
+        \end{equation}
+
+        By the arithmetic-geometric mean inequality applied to the eigenvalues of the positive definite matrix $\hat{B}_{k+1}$ then we have
+        \[
+        \det(\hat{B}_{k+1}) \leq \left(\frac{\mathrm{trace}(\hat{B}_{k+1})}{d}\right)^d
+        \]
+        where $d = \dim M$. Combining with \eqref{trace_geometric_bound} and \eqref{det_iterated} we obtain
+        \[
+        \det(\hat{B}_1)\prod_{j=1}^{k}\frac{1}{a_{10}\alpha^j} \leq \left(\frac{b_0^{k+1}}{d}\right)^d
+        \]
+        that is,
+        \[
+        \prod_{j=1}^k \frac{1}{\alpha^j} \leq \frac{a_{10}^k\,b_0^{d(k+1)}}{d^d\,\det(\hat{B}_1)}
+        \]
+        and hence
+        \[
+        \prod_{j=1}^k \alpha^j \geq \frac{d^d\,\det(\hat{B}_1)}{b_0^d}\cdot\frac{1}{(a_{10}\,b_0^d)^k}
+        \]
+        Let $C = \frac{d^d\,\det(\hat{B}_1)}{b_0^d}>0$ and $\tilde{a} = \frac{1}{a_{10}\,b_0^d}>0$. Then $\prod_{j=1}^k\alpha^j \geq C\,\tilde{a}^k$. Since $C>0$ is a fixed constant (independent of $k$) and $C^{1/k}\to 1$ as $k\to\infty$, we can choose $a_{13} = \tilde{a}/2>0$ (or any constant strictly smaller than $\tilde{a}$) such that $C\,\tilde{a}^k \geq a_{13}^k$ for all $k\geq 1$. This completes the proof.
+\end{proof}
+\subsection{Main Result}
+\begin{theorem}\label{main_result}
+        Suppose Assumptions \ref{assumption_1}, \ref{assumption_2} and \ref{assumption_3} hold, and $\phi_k\in [0,1-\delta]$ for some fixed $\delta>0$. Then the sequence $\{x^k\}$ generated by Algorithm \ref{Riemannian_Broyden's_Method} converges to the minimizer $x^\ast$ of $f$.
+\end{theorem}
+\begin{proof}
+        The trace inequality \eqref{trace_update} can be rewritten as
+        \begin{equation}\label{trace_refined}
+                \mathrm{trace}(\hat{B}_{k+1}) \leq \mathrm{trace}(\hat{B}_k) + a_8 + t_k\alpha^k
+        \end{equation}
+        where
+        \[
+        t_k = \phi_k a_8 a_{10} - \frac{a_{11}(1-\phi_k)}{\cos^2\theta_k} + \frac{2\phi_k a_{12}}{\cos\theta_k}
+        \]
+        Here the term $-\frac{a_{11}(1-\phi_k)}{\cos^2\theta_k}$ arises from the third term in \eqref{trace_update} via \eqref{ineq_8.2}, which was previously dropped but is now retained.
+
+        We argue by contradiction. Assume $\cos\theta_k \to 0$ as $k\to\infty$. Then $t_k \to -\infty$, since the dominant term $-\frac{a_{11}(1-\phi_k)}{\cos^2\theta_k}\leq -\frac{a_{11}\delta}{\cos^2\theta_k}\to -\infty$ while the other two terms grow at most as $O(1/\cos\theta_k)$.
+        
+        In particular, there exists $K_0>0$ such that
+        \begin{equation}
+                t_k < -\frac{2a_8}{a_{13}} \quad \text{for all } k\geq K_0
+        \end{equation}
+        where $a_{13}$ is the constant from Lemma \ref{lemma_9}. Since $\hat{B}_{k+1}$ is positive definite, we habe $\mathrm{trace}(\hat{B}_{k+1})>0$. Summing \eqref{trace_refined} from $j=K_0$ to $k$ then it holds that
+        \begin{equation}\label{trace_sum}
+        \begin{aligned}
+                0 < \mathrm{trace}(\hat{B}_{k+1}) &\leq \mathrm{trace}(\hat{B}_{K_0}) + a_8(k+1-K_0) + \sum_{j=K_0}^{k}t_j\alpha^j\\
+                &< \mathrm{trace}(\hat{B}_{K_0}) + a_8(k+1-K_0) - \frac{2a_8}{a_{13}}\sum_{j=K_0}^{k}\alpha^j
+        \end{aligned}
+        \end{equation}
+        On the other hand, by Lemma \ref{lemma_9}, $\prod_{j=1}^k\alpha^j \geq a_{13}^k$. Applying the AM--GM inequality to $\alpha^1,\ldots,\alpha^k$
+        \[
+        \frac{1}{k}\sum_{j=1}^{k}\alpha^j \geq \left(\prod_{j=1}^{k}\alpha^j\right)^{1/k} \geq a_{13}
+        \]
+        therefore $\sum_{j=1}^k\alpha^j \geq k\,a_{13}$, and hence
+        \begin{equation}\label{partial_sum_lower}
+                \sum_{j=K_0}^{k}\alpha^j \geq k\,a_{13} - \sum_{j=1}^{K_0-1}\alpha^j
+        \end{equation}
+        Substituting \eqref{partial_sum_lower} into \eqref{trace_sum} it follows that
+        \[
+        \begin{aligned}
+                0 &< \mathrm{trace}(\hat{B}_{K_0}) + a_8(k+1-K_0) - \frac{2a_8}{a_{13}}\left(k\,a_{13} - \sum_{j=1}^{K_0-1}\alpha^j\right)\\
+                &= \mathrm{trace}(\hat{B}_{K_0}) + a_8(1-k-K_0) + \frac{2a_8}{a_{13}}\sum_{j=1}^{K_0-1}\alpha^j
+        \end{aligned}
+        \]
+        The right-hand side tends to $-\infty$ as $k\to\infty$, which is a contradiction. Therefore the assumption $\cos\theta_k\to 0$ is false. It follows that there exist a constant $\delta_0>0$ and a subsequence $\{k_j\}$ such that $\cos\theta_{k_j}>\delta_0$ for all $j$. By Lemma \ref{lemma_5},
+        \[
+        f(x^{k_j+1}) - f(x^\ast) \leq (1-a_5\delta_0^2)(f(x^{k_j}) - f(x^\ast))
+        \]
+        Since $\{f(x^k)\}$ is non-increasing by the Armijo condition and bounded below by $f(x^\ast)$, the above subsequential contraction implies $f(x^k)\to f(x^\ast)$, equivalently $x^k\to x^\ast$.
+\end{proof}
+
+\bibliographystyle{plain}
+\nocite{*}
+\bibliography{\bibfile}
+
+\end{document}
+
+
