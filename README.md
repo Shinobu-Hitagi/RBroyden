@@ -1,6 +1,4 @@
-# Convergence of Riemannian Broyden Family of Quasi-Newton Methods with Wolfe Line Search
-
-**Author:** Xie Zhilin
+# Convergence of RBroyden Family of Quasi-Newton Methods with Wolfe Line Search
 
 ## Abstract
 
