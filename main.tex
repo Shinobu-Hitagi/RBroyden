@@ -548,7 +548,7 @@ For an arbitrary $F$-linear space $V$, we define
 \begin{equation}
         \otimes^{l,k} V = \underbrace{V^\ast \otimes \cdots \otimes V^\ast}_{l\text{ times}} \otimes \underbrace{V \otimes \cdots \otimes V}_{k\text{ times}} \cong \mathrm{Hom}\left(\bigotimes^l V\otimes\bigotimes^k V^\ast,F\right)
 \end{equation}
-the element in $\otimes^{l,k} V$ is called a \emph{tensor of type $(l,k)$}. The index $l$ is called the \emph{covariant order} and the index $k$ is called the \emph{contravariant order}. A tensor of type $(0,0)$ is a scalar, a tensor of type $(1,0)$ is a vector, and a tensor of type $(0,1)$ is a covector. A tensor of type $(1,1)$ is called a \emph{linear operator}, since it can be identified with an element in $\mathrm{Hom}(V,V)$. A tensor of type $(0,2)$ is called a \emph{bilinear form}, since it can be identified with an element in $\mathrm{Hom}(V\otimes V,F)$. A tensor of type $(2,0)$ is called a \emph{quadratic form}, since it can be identified with an element in $\mathrm{Hom}(V^\ast \otimes V^\ast,F)$.
+
 \subsubsection{Smooth Manifolds and Tangent Spaces}
 In brief, a smooth manifold is a topological space that locally looks like Euclidean space and has a smooth structure. The so-called smooth structure is to make sure the charts change smoothly, so that we can define the smoothness of functions on the manifold. 
 \begin{definition}[Smooth Manifold]
@@ -621,7 +621,7 @@ A covariant derivative $\nabla$ is \emph{torsion-free} if for all $X,Y \in \Gamm
 
 Given a affine connection $\nabla$, we can generalize it to all type of tensor fields by the following rules. 
 \begin{theorem}[\cite{Jost2017} Theorem 3.2.1]
-        Assume $\nabla$ is a affine connection on a Riemannian manifold $(M,g)$. For a fixed vector field $X$, we can define $\nabla_X: \Gamma^\infty(\otimes^{k,l} TM) \to \Gamma^\infty(\otimes^{k,l} TM)$ by the following rules
+        Assume $\nabla$ is a affine connection on a Riemannian manifold $(M,g)$. For a fixed vector field $X$, we can define the covariant derivative of arbitrary tensor field along $X$ denote by $\nabla_X: \Gamma^\infty(\otimes^{k,l} TM) \to \Gamma^\infty(\otimes^{k,l} TM)$ by the following rules
         \begin{enumerate}
                 \item For all type of tensor fields $\theta$ and $\eta$, we have $$\nabla_X(\theta\otimes \eta) = \nabla_X \theta \otimes \eta + \theta \otimes \nabla_X \eta$$
                 \item For smooth function $f$ and $g$, tensor field $\theta$, vector field $X$ and $Y$, we have $$\nabla_{fX+gY} \theta = f \nabla_X \theta + g \nabla_Y \theta$$
