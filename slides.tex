@@ -1,0 +1,608 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{theorems}[numbered]
+
+%% Packages
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{bbm}
+\usepackage{upgreek}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode,algorithmicx}
+\usepackage[scr=boondoxupr]{mathalfa}
+
+%% Math operators and commands
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\hess}{Hess}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\Span}{span}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\diam}{diam}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\CC}{\mathbb{C}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\VT}{\mathcal{T}}
+\newcommand{\sss}[1]{{\scriptscriptstyle{#1}}}
+\newcommand{\inv}{{-1}}
+\newcommand{\adj}{*}
+\newcommand{\me}{\mathrm{e}}
+\newcommand{\md}{\mathrm{d}}
+\newcommand{\mi}{\mathrm{i}}
+\newcommand{\ie}{{i.e.}\xspace}
+\newcommand{\eg}{{e.g.}\xspace}
+\newcommand{\st}{\textnormal{s.t.}}
+\newcommand{\fro}{{\scriptstyle{\textnormal{F}}}}
+\newcommand{\trs}{{\scriptstyle{\mathsf{T}}}}
+\newcommand{\ind}{\mathbbm{1}}
+
+%% Theorem environments 
+\newtheorem{proposition}{Proposition}
+
+%% Title page
+\title[Riemannian Broyden Family]{Convergence of Riemannian Broyden Family \\of Quasi-Newton Methods with Wolfe Line Search}
+\author{Xie Zhilin}
+\institute{}
+\date{\today}
+
+\begin{document}
+
+%===============================================================
+% PART 0: Title & Outline
+%===============================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+%===============================================================
+% PART 1: Introduction & Motivation
+%===============================================================
+\section{Introduction}
+
+\begin{frame}{Background \& Motivation}
+\begin{itemize}
+    \item Many practical problems reduce to optimization on \textbf{Riemannian manifolds}
+    \begin{itemize}
+        \item Low-rank matrix/tensor recovery ($\to$ fixed-rank manifold)
+        \item Subspace tracking ($\to$ Grassmann manifold)
+    \end{itemize}
+    \bigskip
+    \item \textbf{Quasi-Newton methods} are popular in Euclidean optimization
+    \begin{itemize}
+        \item Superlinear convergence without computing exact Hessian
+        \item DFP, BFGS, and their convex combination (Broyden family)
+    \end{itemize}
+    \bigskip
+    \item \textbf{Goal.} Generalize the Broyden family to Riemannian manifolds and establish its global convergence with Wolfe line search.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Main Reference}
+\begin{itemize}
+    \item This work is mainly based on \textbf{Chapter 4} of
+    \begin{quote}
+    W.\ Huang, \emph{Optimization algorithms on Riemannian manifolds with applications}, PhD thesis, Florida State University, 2014.
+    \end{quote}
+    \item Other key references
+    \begin{itemize}
+        \item Absil, Mahony, Sepulchre — \emph{Optimization Algorithms on Matrix Manifolds} (2008)
+        \item Nocedal, Wright — \emph{Numerical Optimization} (2006)
+        \item Yuan — Convergence of DFP algorithm (1995)
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%===============================================================
+% PART 2: Euclidean Quasi-Newton Review
+%===============================================================
+\section{Quasi-Newton Methods in Euclidean Space}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Quasi-Newton Methods\\[0.3cm] in Euclidean Space}
+\vfill
+\end{frame}
+
+\begin{frame}{Problem \& Secant Equation}
+\begin{block}{Unconstrained Optimization}
+$$\min_{x\in\RR^n} f(x), \quad f\in C^2$$
+\end{block}
+\medskip
+From Taylor expansion of $\nabla f$ at $x^{k+1}$, with $s^k = x^{k+1}-x^k$, $y^k = \nabla f(x^{k+1})-\nabla f(x^k)$:
+$$y^k \approx \nabla^2 f(x^{k+1})\,s^k$$
+\begin{block}{Secant Equation}
+\vspace{-0.3cm}
+\begin{align*}
+    y^k &= B^{k+1}\,s^k \quad(\text{Hessian approx.})\\
+    s^k &= H^{k+1}\,y^k \quad(\text{inverse Hessian approx.})
+\end{align*}
+\end{block}
+\textbf{Curvature condition.} $(s^k)^\top y^k > 0$ ensures $B^{k+1}$ can be positive definite.
+\end{frame}
+
+\begin{frame}{Wolfe Conditions}
+\begin{definition}[Wolfe Conditions]
+For constants $0<c_1<c_2<1$ we require the step size $\alpha^k$ to satisfy
+\begin{align*}
+    f(x^{k+1}) &\leq f(x^k) + c_1\,\nabla f(x^k)^\top s^k \quad &\text{(Armijo)}\\
+    \nabla f(x^{k+1})^\top s^k &\geq c_2\,\nabla f(x^k)^\top s^k \quad &\text{(Curvature)}
+\end{align*}
+\end{definition}
+\medskip
+\begin{lemma}
+Wolfe conditions $\Longrightarrow$ curvature condition $(s^k)^\top y^k > 0$.
+\end{lemma}
+\begin{proof}
+$(s^k)^\top y^k = (\nabla f(x^{k+1}) - \nabla f(x^k))^\top s^k \geq (c_2-1)\nabla f(x^k)^\top s^k > 0$, since $c_2<1$ and $s^k$ is a descent direction.
+\end{proof}
+\end{frame}
+
+\begin{frame}{DFP \& BFGS Updates}
+\begin{block}{DFP Update (Hessian approximation)}
+$$B^{k+1} = \left(I - \rho_k y^k(s^k)^\top\right)B^k\left(I - \rho_k s^k(y^k)^\top\right) + \rho_k y^k(y^k)^\top$$
+where $\rho_k = 1/(y^k)^\top s^k$.
+\end{block}
+
+\begin{block}{BFGS Update}
+$$B^{k+1} = B^k + \frac{y^k(y^k)^\top}{(y^k)^\top s^k} - \frac{B^ks^k(s^k)^\top B^k}{(s^k)^\top B^ks^k}$$
+\end{block}
+
+Both solve variational problems of the form
+$$\min_{B}\;\|B - B^k\|_W \quad\st\quad B=B^\top,\; Bs^k = y^k$$
+\end{frame}
+
+\begin{frame}{Broyden Family \& DFP Convergence}
+\textbf{Broyden family}: convex combination of BFGS and DFP with parameter $\phi_k\in[0,1]$:
+$$B^{k+1} = (1-\phi_k)\,B^k_{\mathrm{BFGS}} + \phi_k\,B^k_{\mathrm{DFP}}$$
+$\phi_k=0$: pure BFGS; \quad $\phi_k=1$: pure DFP.
+
+\bigskip
+\begin{theorem}[Yuan, 1995]
+If $H^0\succ 0$, $f\in C^2$ bounded below, level set $\mathcal{L}$ convex, and
+$$m\|s\|^2 \leq s^\top\nabla^2 f(x)\,s \leq M\|s\|^2 \quad\forall\, s,\; x\in\mathcal{L},$$
+then DFP with Wolfe line search converges globally.
+\end{theorem}
+\end{frame}
+
+%===============================================================
+% PART 3: Riemannian Setting — Retraction & Vector Transport
+%===============================================================
+\section{Riemannian Ingredients}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Riemannian Ingredients}
+\vfill
+\end{frame}
+
+\begin{frame}{Retraction}
+\begin{definition}[Retraction]
+A smooth map $R:TM\to M$, $(p,v)\mapsto R_p(v)$, such that for the curve $c(t) = R_p(tv)$
+$$c(0) = p, \quad c'(0)[v] = v \quad (\text{i.e., } dR_p(0) = \mathrm{id}), \quad \text{for all } v\in T_pM$$
+\end{definition}
+
+\begin{itemize}
+    \item Generalizes the \textbf{exponential map} $\exp_p$, which may be expensive to compute.
+    \item By inverse function theorem, map $R_p$ is a local diffeomorphism near $0$.
+    \item Computes the Riemannian gradient
+    $$\grad f(p) = \grad(f\circ R_p)(0)$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Vector Transport}
+\begin{definition}[Vector Transport]
+A smooth map $\VT: TM\oplus TM \to TM$, $(p,v,w)\mapsto \VT_{v_p}(w)$, such that for some retraction $R$
+\begin{enumerate}
+    \item $\VT_{v_p}: T_pM \to T_{R_p(v)}M$ is linear.
+    \item $\VT_{0_p} = \mathrm{id}_{T_pM}$.
+\end{enumerate}
+\end{definition}
+
+\bigskip
+\textbf{Two important kinds of vector transport}
+\begin{itemize}
+    \item \textbf{Differentiated retraction} $\VT_R$: $\VT_{R_{v_p}}(w) = dR_p(v)[w]$
+    \item \textbf{Isometric vector transport} $\VT_S$: preserves inner products
+    $$g_{R_p(v)}(\VT_{S_{v_p}}(w),\, \VT_{S_{v_p}}(w)) = g_p(w,w)$$
+\end{itemize}
+Parallel transport is a special case (isometric + geodesic).
+\end{frame}
+
+\begin{frame}{Locking Condition}
+To relate $\VT_R$ and $\VT_S$, we impose
+\begin{definition}[Locking Condition]
+\begin{align*}
+    \VT_{S_\eta}\,\eta &= \beta\,\VT_{R_\eta}\,\eta\\
+    \beta &= \frac{\|\eta\|}{\|\VT_{R_\eta}\,\eta\|}
+\end{align*}
+\end{definition}
+This ensures
+\begin{itemize}
+    \item $\|\VT_{S_\eta}\,\eta\| = \|\eta\|$ (isometry along the search direction)
+    \item The curvature condition $g(s^k,y^k)>0$ is \textbf{preserved} when pushing out $\mathcal{B}^k$ via $\VT_S$.
+\end{itemize}
+\bigskip
+We also assume the operator norm bound
+$$\|\VT_{R_\eta} - \VT_{S_\eta}\|_p \leq \delta\|\eta\|, \quad \|\VT_{R_\eta}^{-1} - \VT_{S_\eta}^{-1}\|_p \leq \delta\|\eta\|$$
+\end{frame}
+
+%===============================================================
+% PART 4: Riemannian Secant Equation
+%===============================================================
+\section{Riemannian Secant Equation}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Riemannian Secant Equation}
+\vfill
+\end{frame}
+
+\begin{frame}{Taylor Expansion of a Vector Field}
+\begin{theorem}[Taylor Expansion of a Vector Field]
+Let $X$ be a smooth vector field, $\gamma$ a geodesic with $\gamma(0)=p$, $\dot\gamma(0)=v$. Then:
+$$P_{1\to 0}^\gamma\,X_{\gamma(1)} = X_p + \sum_{i=1}^{k-1}\frac{1}{i!}\nabla^i_{\dot\gamma}X_p(\underbrace{v,\ldots,v}_{i}) + R_k$$
+\end{theorem}
+\begin{itemize}
+    \item We pull back $X_{\gamma(t)}$ via parallel transport to $T_pM$, then apply Taylor expansion in the vector space $T_pM\cong\RR^n$.
+    \item Higher-order covariant derivatives along geodesics
+    $$\nabla^i X_{\gamma(t)}(\dot\gamma,\ldots,\dot\gamma) = \underbrace{\nabla_{\dot\gamma}\nabla_{\dot\gamma}\cdots\nabla_{\dot\gamma}}_{i}\,X$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deriving the Riemannian Secant Equation}
+Apply the Taylor expansion to $X = \grad f$ along geodesic $\gamma_k$ from $x^k$ to $x^{k+1}$ then
+$$P_{1\to 0}^{\gamma_k}\,\grad f(x^{k+1}) \approx \grad f(x^k) + \hess f(x^k)[s^k_0]$$
+
+Push to $T_{x^{k+1}}M$ and drop the remainder, then we similarly get the Riemannian secant equation
+\begin{block}{Riemannian Secant Equation}
+$$y^k = \mathcal{B}^{k+1}\,s^k$$
+where
+\begin{align*}
+    y^k &= \grad f(x^{k+1}) - P_{0\to 1}^{\gamma_k}\,\grad f(x^k)\\
+    s^k &= P_{0\to 1}^{\gamma_k}\,s^k_0
+\end{align*}
+\end{block}
+\textbf{Curvature condition.} $g_{x^{k+1}}(s^k, y^k) > 0$.
+\end{frame}
+
+\begin{frame}{General Retraction \& Vector Transport}
+In practice, we replace (since the calculation of $\exp$ and parallel transport may be expensive)
+\begin{itemize}
+    \item $\exp$ $\longrightarrow$ general retraction $R$
+    \item Parallel transport $\longrightarrow$ isometric vector transport $\VT_S$
+\end{itemize}
+
+\medskip
+Then
+\begin{align*}
+    s^k &= \VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k)\\
+    y^k &= (\beta^k)^{-1}\grad f(x^{k+1}) - \VT_{S_{\alpha^k\eta^k}}(\grad f(x^k))
+\end{align*}
+where $\beta^k = \frac{\|\alpha^k\eta^k\|_{x^k}}{\|\VT_{R_{\alpha^k\eta^k}}(\alpha^k\eta^k)\|_{x^{k+1}}}$, and $\eta^k = -(\mathcal{B}^k)^{-1}\grad f(x^k)$ is the search direction.
+
+\end{frame}
+%===============================================================
+% PART 5: Riemannian Broyden Update
+%===============================================================
+\section{Riemannian Broyden Update}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Riemannian Broyden Update}
+\vfill
+\end{frame}
+
+\begin{frame}{DFP \& BFGS on Manifolds}
+\textbf{DFP update.} solve variational problem with operator norm $\|\cdot\|_W$ on manifold
+$$\mathcal{B}^{k+1} = \left(\mathrm{id} - \frac{y^k(s^k)^\flat}{g(y^k,s^k)}\right)\tilde{\mathcal{B}}^k\left(\mathrm{id} - \frac{s^k(y^k)^\flat}{g(y^k,s^k)}\right) + \frac{y^k(y^k)^\flat}{g(y^k,s^k)}$$
+
+\textbf{BFGS update.}
+$$\mathcal{B}^{k+1} = \tilde{\mathcal{B}}^k + \frac{y^k(y^k)^\flat}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^ks^k(\tilde{\mathcal{B}}^ks^k)^\flat}{g(s^k,\tilde{\mathcal{B}}^ks^k)}$$
+
+Here $\flat: T_pM\to T_p^*M$ is the musical isomorphism defined by $v^\flat = g(v,\cdot)$, and
+$$\tilde{\mathcal{B}}^k = \VT_{S_{\alpha^k\eta^k}}\circ\mathcal{B}^k\circ\VT_{S_{\alpha^k\eta^k}}^{-1}$$
+is the push-out of $\mathcal{B}^k$ from $T_{x^k}M$ to $T_{x^{k+1}}M$.
+\end{frame}
+
+\begin{frame}{Euclidean vs.\ Riemannian --- Notation}
+\centering
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+& \textbf{Euclidean} & \textbf{Riemannian} \\
+\midrule
+Inner product & $(s^k)^\top y^k$ & $g(s^k,y^k)$ \\
+Dual pairing & $u\, v^\top$ & $u\, v^\flat$ \\
+Identity & $I$ & $\mathrm{id}$ \\
+Previous $B^k$ & $B^k$ (reuse directly) & $\tilde{\mathcal{B}}^k$ (push-out via $\VT_S$) \\
+\bottomrule
+\end{tabular}
+
+\bigskip
+\textbf{Key difference.} In $\RR^n$, all tangent spaces are the same, so $B^k$ can be reused directly. On manifolds, $\mathcal{B}^k: T_{x^k}M\to T_{x^k}M$ must first be \textbf{transported} to $T_{x^{k+1}}M$:by
+$$\tilde{\mathcal{B}}^k = \VT_S\circ\mathcal{B}^k\circ\VT_S^{-1}$$
+After this push-out, the update formulas are \textbf{formally identical}.
+\end{frame}
+
+\begin{frame}{Euclidean vs.\ Riemannian --- BFGS Update}
+\textbf{Euclidean BFGS.}
+$$B^{k+1} = B^k + \frac{y^k(y^k)^\top}{(y^k)^\top s^k} - \frac{B^ks^k(s^k)^\top B^k}{(s^k)^\top B^ks^k}$$
+
+\textbf{Riemannian BFGS.}
+$$\mathcal{B}^{k+1} = \tilde{\mathcal{B}}^k + \frac{y^k(y^k)^\flat}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^ks^k(\tilde{\mathcal{B}}^ks^k)^\flat}{g(s^k,\tilde{\mathcal{B}}^ks^k)}$$
+
+\bigskip
+\textbf{Correspondence.}
+\begin{itemize}
+    \item $B^k \longrightarrow \tilde{\mathcal{B}}^k$ \quad (push-out replaces direct reuse)
+    \item $(\cdot)^\top \longrightarrow (\cdot)^\flat$ \quad (transpose $\to$ musical isomorphism)
+    \item $u^\top v \longrightarrow g(u,v)$ \quad (dot product $\to$ Riemannian metric)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Broyden Family on Manifolds}
+\begin{block}{Riemannian Broyden Update}
+\begin{align*}
+\mathcal{B}^{k+1}(\cdot) &= \tilde{\mathcal{B}}^k(\cdot) + \frac{y^k(y^k)^\flat(\cdot)}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^ks^k(\tilde{\mathcal{B}}^ks^k)^\flat(\cdot)}{g(s^k,\tilde{\mathcal{B}}^ks^k)}\\
+&\quad + \phi_k\,g(s^k,\tilde{\mathcal{B}}^ks^k)\,v^k(v^k)^\flat(\cdot)
+\end{align*}
+where $v^k = \frac{y^k}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^ks^k}{g(s^k,\tilde{\mathcal{B}}^ks^k)}$.
+\end{block}
+
+\medskip
+\begin{itemize}
+    \item $\phi_k=0$: Riemannian BFGS
+    \item $\phi_k=1$: Riemannian DFP
+    \item $\phi_k\in[0,1]$: Riemannian Broyden family
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wolfe Line Search on Manifolds}
+Given search direction $\eta^k = -(\mathcal{B}^k)^{-1}\grad f(x^k)$ and step size $\alpha^k$
+\begin{block}{Riemannian Wolfe Conditions ($0<c_1<c_2<1$)}
+\begin{align*}
+    f(R_{x^k}(\alpha^k\eta^k)) &\leq f(x^k) + c_1\alpha^k\,g_{x^k}(\grad f(x^k),\eta^k)\\[3pt]
+    \left.\frac{d}{dt}f(R_{x^k}(t\eta^k))\right|_{t=\alpha^k} &\geq c_2\left.\frac{d}{dt}f(R_{x^k}(t\eta^k))\right|_{t=0}
+\end{align*}
+\end{block}
+\end{frame}
+
+%===============================================================
+% PART 6: Algorithm
+%===============================================================
+\section{Algorithm}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Algorithm}
+\vfill
+\end{frame}
+
+\begin{frame}{Riemannian Broyden's Method}
+\begin{algorithmic}[1]
+\Require $(M,g)$, retraction $R$, isometric transport $\VT_S$, $f\in C^2$, $x^0\in M$, $\mathcal{B}^0\succ 0$, $\{\phi_k\}\subset[0,1]$, $0<c_1<c_2<1$, $\varepsilon>0$.
+\State $k\gets 0$
+\While{$\|\grad f(x^k)\|_{x^k}>\varepsilon$}
+    \State Compute search direction: $\eta^k = -(\mathcal{B}^k)^{-1}\grad f(x^k)$
+    \State Find step size $\alpha^k$ satisfying Riemannian Wolfe conditions
+    \State Update: $x^{k+1} = R_{x^k}(\alpha^k\eta^k)$
+    \State Compute: 
+    \begin{align*}
+        s^k &= \VT_{S_{\alpha^k\eta^k}}(\alpha^k\eta^k)\\
+        y^k &= (\beta^k)^{-1}\grad f(x^{k+1}) - \VT_{S_{\alpha^k\eta^k}}(\grad f(x^k))
+    \end{align*}
+\EndWhile
+\end{algorithmic}
+\end{frame}
+
+\begin{frame}{Riemannian Broyden's Method}
+\begin{algorithmic}[1]
+\setcounter{ALG@line}{6}
+    \State Push out: $\tilde{\mathcal{B}}^k = \VT_{S_{\alpha^k\eta^k}}\circ\mathcal{B}^k\circ\VT_{S_{\alpha^k\eta^k}}^{-1}$
+    \State Broyden update
+    \begin{align*}
+        \mathcal{B}^{k+1}(\cdot) &= \tilde{\mathcal{B}}^k(\cdot) + \frac{y^k(y^k)^\flat(\cdot)}{g(y^k,s^k)} - \frac{\tilde{\mathcal{B}}^ks^k(\tilde{\mathcal{B}}^ks^k)^\flat(\cdot)}{g(s^k,\tilde{\mathcal{B}}^ks^k)}\\
+        &\quad + \phi_k\,g(s^k,\tilde{\mathcal{B}}^ks^k)\,v^k(v^k)^\flat(\cdot)
+    \end{align*}
+    \State $k\gets k+1$
+\end{algorithmic}
+\end{frame}
+
+%===============================================================
+% PART 7: Convergence Analysis
+%===============================================================
+\section{Convergence Analysis}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Convergence Analysis}
+\vfill
+\end{frame}
+
+\begin{frame}{Key Assumptions}
+\begin{block}{Assumption 1 (Smoothness)}
+$f$ is twice continuously differentiable on $M$.
+\end{block}
+
+\begin{block}{Assumption 2 (Retraction domain)}
+$\exists\, r,\rho>0$ such that for each $y$ in the retraction neighborhood
+$$\widetilde{\Omega}_p = \{R_p(t\eta): p\in\Omega_{x_0},\,\|\eta\|=1,\,t\in[0,r)\},$$
+$R_y$ is a diffeomorphism on $B(0,\rho)\subset T_yM$ and $\widetilde{\Omega}\subset R_y(B(0,\rho))$.
+\end{block}
+
+\begin{block}{Assumption 3 (Strong retraction-convexity)}
+For $t\in[0,\alpha^k]$, $R_{x^k}(t\eta^k)\in\widetilde{\Omega}_{x^k}$. The function $f$ is \textbf{strongly retraction-convex} w.r.t.\ $R$ in $\overline{\widetilde{\Omega}_{x_0}}$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Retraction-Convexity}
+\begin{definition}
+$f$ is \emph{retraction-convex} w.r.t.\ $R$ in $S\subseteq M$ if
+$$t\mapsto f(R_p(t\eta)) \quad\text{is convex}$$
+for all $p\in S$, $\|\eta\|=1$, with $R_p(t\eta)\in S$.
+\end{definition}
+
+\begin{lemma}
+Under Assumptions 1--2, with $R=\exp$
+$$f \text{ retraction-convex } \iff \hess f \succeq 0$$
+$$f \text{ strongly retraction-convex } \iff \hess f \succeq \lambda_0\,\mathrm{id},\; \lambda_0>0$$
+\end{lemma}
+This connects the intrinsic Hessian to the 1D convexity of retraction curves.
+\end{frame}
+
+\begin{frame}{Curvature Condition is Preserved}
+\begin{lemma}
+Under the locking condition, Algorithm produces well-defined iterates with $\mathcal{B}^k\succ 0$ for all $k$, and
+$$g(s^k,y^k) \geq (c_2-1)\alpha^k\,g(\grad f(x^k),\eta^k) > 0$$
+\end{lemma}
+
+\textbf{Proof sketch.}
+\begin{enumerate}
+    \item Define $\widetilde{m}_k(t) = f(R_{x^k}(t\eta^k/\|\eta^k\|))$.
+    \item Use locking condition to relate $\VT_S$ and $\VT_R$ terms.
+    \item Apply Wolfe curvature condition to get the lower bound.
+    \item Positive definiteness of $\mathcal{B}^{k+1}$ is proved by induction using the determinant formula and Cauchy--Schwarz.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Preliminary Estimates (I)}
+\begin{lemma}
+$$\frac{1}{2}a_0\|s^k\|^2 \leq (c_1-1)\alpha^k\,g(\grad f(x^k),\eta^k)$$
+\end{lemma}
+\emph{From Taylor expansion + Armijo condition.}
+
+\bigskip
+\begin{lemma}[Dennis--Mor\'{e} type bound]
+$\exists\; 0<b_0<b_1$ such that
+$$b_0\,\|s^k\|^2 \leq g(s^k,y^k) \leq b_1\,\|s^k\|^2$$
+\end{lemma}
+\emph{From integral representation of $g(s^k,y^k)$ and strong retraction-convexity bounds.}
+\end{frame}
+
+\begin{frame}{Preliminary Estimates (II)}
+\begin{lemma}
+$\exists\; 0<a_2<a_3$ such that
+$$a_2\,\|\grad f(x^k)\|\cos\theta_k \leq \|s^k\| \leq a_3\,\|\grad f(x^k)\|\cos\theta_k$$
+where $\cos\theta_k = \frac{-g(\grad f(x^k),\eta^k)}{\|\grad f(x^k)\|\,\|\eta^k\|}$.
+\end{lemma}
+
+\bigskip
+This tells us, \textbf{the step size $\|s^k\|$ is controlled by the gradient norm and the search direction quality}.
+\end{frame}
+
+\begin{frame}{Preliminary Estimates (III)}
+
+\begin{lemma}[Zoutendijk-type condition]
+$\exists\; a_5>0$ such that
+$$f(x^{k+1}) - f(x^\ast) \leq (1-a_5\cos^2\theta_k)(f(x^k)-f(x^\ast))$$
+\end{lemma}
+\emph{Key consequence. whenever $\cos\theta_k\geq\delta_0>0$, we get a \textbf{contraction}.}
+\end{frame}
+
+\begin{frame}{Product of Step Sizes}
+\begin{lemma}
+Under Assumptions 1--3 with $\phi_k\in[0,1]$, $\exists\; a_{13}>0$ such that
+$$\prod_{j=1}^k \alpha^j \geq a_{13}^k \quad \forall\, k\geq 1$$
+\end{lemma}
+
+\textbf{Proof sketch.} (the $\hat{B}_k$ are the coordinate representations of $\tilde{\mathcal{B}}^k$ in an orthonormal basis)
+\begin{enumerate}
+    \item \textbf{Trace bound.} $\mathrm{trace}(\hat{B}_k)\leq b_0^k$.
+    \item \textbf{Determinant bound.} $\det(\hat{B}_{k+1})\geq \det(\hat{B}_k)\cdot\frac{g(y^k,s^k)}{g(s^k,\tilde{\mathcal{B}}^ks^k)}$.
+    \item \textbf{AM--GM.} Eigenvalue arithmetic-geometric mean inequality
+    $$\det(\hat{B}_{k+1})\leq \left(\frac{\tr(\hat{B}_{k+1})}{d}\right)^d$$
+    \item Combine to get geometric lower bound for $\prod\alpha^j$.
+\end{enumerate}
+\end{frame}
+
+%===============================================================
+% PART 8: Main Theorem
+%===============================================================
+\section{Main Theorem}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\bfseries Main Theorem}
+\vfill
+\end{frame}
+
+\begin{frame}{Global Convergence}
+\begin{theorem}[Main Result]
+Suppose Assumptions 1--3 hold and $\phi_k\in[0,1-\delta]$ for some fixed $\delta>0$. Then the sequence $\{x^k\}$ generated by the Riemannian Broyden method converges to the minimizer $x^*$.
+\end{theorem}
+\bigskip
+\textbf{Key requirement}: $\phi_k\leq 1-\delta$ (bounded away from pure DFP).
+\begin{itemize}
+    \item Pure BFGS ($\phi_k=0$): always covered.
+    \item Pure DFP ($\phi_k=1$): \textbf{not} covered by this theorem.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Proof Strategy}
+\textbf{Assume} $\cos\theta_k\to 0$ (search direction deteriorates). Then
+
+\medskip
+\begin{enumerate}
+    \item The refined trace inequality
+    $$\tr(\hat{B}_{k+1})\leq \tr(\hat{B}_k) + a_8 + t_k\,\alpha^k$$
+    where $t_k = \phi_k a_8 a_{10} - \frac{a_{11}(1-\phi_k)}{\cos^2\theta_k} + \frac{2\phi_k a_{12}}{\cos\theta_k}$.
+    \medskip
+    \item Since $\phi_k\leq 1-\delta$, the dominant term is $-\frac{a_{11}\delta}{\cos^2\theta_k}\to -\infty$.
+    \medskip
+    \item So $t_k\to -\infty$, specifically $t_k < -\frac{2a_8}{a_{13}}$ for $k$ large.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Proof Strategy}
+\begin{enumerate}
+    \setcounter{enumi}{3}
+    \item By AM--GM and the product bound $\prod\alpha^j\geq a_{13}^k$
+    $$\sum_{j=1}^k \alpha^j \geq k\,a_{13}$$
+    \item Summing the trace inequality from $K_0$ to $k$:
+    \begin{align*}
+        0 < \tr(\hat{B}_{k+1}) &\leq \tr(\hat{B}_{K_0}) + a_8(k+1-K_0) - \frac{2a_8}{a_{13}}\sum_{j=K_0}^k\alpha^j\\
+        &\leq \mathrm{const} - a_8\,k \to -\infty
+    \end{align*}
+    \textbf{Contradiction!} since $\tr(\hat{B}_{k+1})>0$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Proof Strategy}
+Therefore $\cos\theta_k\not\to 0$, i.e., $\exists\;\delta_0>0$ and subsequence $\{k_j\}$ with
+$$\cos\theta_{k_j} > \delta_0$$
+
+\medskip
+By the Zoutendijk-type lemma
+$$f(x^{k_j+1}) - f(x^*) \leq (1-a_5\delta_0^2)\,(f(x^{k_j})-f(x^*))$$
+
+\medskip
+Since $\{f(x^k)\}$ is non-increasing (Armijo) and bounded below
+$$\boxed{f(x^k)\to f(x^*), \quad x^k\to x^*}$$
+\end{frame}
+
+\begin{frame}
+\centering
+\Huge Thank You!
+\end{frame}
+
+\end{document}
