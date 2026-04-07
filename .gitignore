@@ -10,4 +10,5 @@
 *.xdv
 *.pdf
 !main.pdf
+!slides.pdf
 .DS_Store
